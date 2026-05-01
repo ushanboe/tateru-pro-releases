@@ -31,9 +31,9 @@ Tateru stores all user data — login, license, generated projects, built APKs, 
 
 | OS | Data dir |
 |---|---|
-| Linux | `~/.config/Tateru Pro/data/` |
-| macOS | `~/Library/Application Support/Tateru Pro/data/` |
-| Windows | `%APPDATA%\Tateru Pro\data\` |
+| Linux | `~/.config/tateru-pro-plus/data/` |
+| macOS | `~/Library/Application Support/tateru-pro-plus/data/` |
+| Windows | `%APPDATA%\tateru-pro-plus\data\` |
 
 LLM API keys are stored separately in your OS keychain (macOS Keychain / GNOME Keyring / Windows Credential Manager).
 
@@ -99,7 +99,7 @@ Open the [latest release](https://github.com/ushanboe/tateru-pro-releases/releas
 pkill -f "Tateru Pro" 2>/dev/null
 
 # Wipe data dir (DB, projects, built APKs, license cache)
-rm -rf "$HOME/.config/Tateru Pro"
+rm -rf "$HOME/.config/tateru-pro-plus"
 
 # Wipe keyring entries (LLM API keys)
 # GNOME: open Seahorse / Passwords and Keys → search "tateru" → delete
@@ -153,10 +153,10 @@ Or via Finder: drag `Tateru Pro` from Applications → Trash.
 ```bash
 osascript -e 'quit app "Tateru Pro"' 2>/dev/null
 rm -rf "/Applications/Tateru Pro.app"
-rm -rf "$HOME/Library/Application Support/Tateru Pro"
+rm -rf "$HOME/Library/Application Support/tateru-pro-plus"
 rm -rf "$HOME/Library/Caches/com.tateru.pro.plus"
 rm -rf "$HOME/Library/Preferences/com.tateru.pro.plus.plist"
-rm -rf "$HOME/Library/Logs/Tateru Pro"
+rm -rf "$HOME/Library/Logs/tateru-pro-plus"
 rm -rf "$HOME/.tateru-pro"          # cloud-client cache (JWT, offline queue)
 ```
 
@@ -232,7 +232,7 @@ Stop-Process -Name "Tateru Pro" -Force -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Tateru Pro"
 
 # Wipe data dir (DB, projects, built APKs, license cache)
-Remove-Item -Recurse -Force "$env:APPDATA\Tateru Pro"
+Remove-Item -Recurse -Force "$env:APPDATA\tateru-pro-plus"
 
 # Wipe cloud-client cache (JWT, offline queue)
 Remove-Item -Recurse -Force "$env:USERPROFILE\.tateru-pro"
