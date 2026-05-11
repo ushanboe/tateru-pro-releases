@@ -1,127 +1,183 @@
-# Quick Start Guide
-
+---
 **App:** Tateru Pro
-**Audience:** New users — your first app in 10 minutes.
+**Version:** 1.0.0-beta.9.32.13
+**Owner:** KangaBlue.au
+**Contact:** support@tateru.app
+**Last updated:** 2026-05-11
+---
 
-Tateru Pro builds real Android apps from a description. You bring your own AI key (Anthropic recommended), Tateru runs the pipeline, and you get an installable APK.
+# Quick Start
+
+A 10-minute walkthrough from "downloaded the installer" to "Android APK on your phone". For deeper detail on any step, see [USER_MANUAL.md](USER_MANUAL.md).
 
 ---
 
-## 1. Set up your AI key (one-time)
+## 0. Prerequisites
 
-1. Click the **Settings** gear (bottom-left of the sidebar).
-2. Under **AI Providers** → paste an Anthropic API key.
-3. Click **Test** — should show ✓ Connected.
+Before you start:
 
-**Cost expectation:** ~$6–20 in Anthropic API credits per app, depending on complexity (calibrated against real Phase 20–22 builds). Tiny utilities are cheaper, complex multi-screen apps with AI features are higher. Money goes to Anthropic directly (BYOK), not to Tateru.
+- A computer running Linux, macOS, or Windows (64-bit)
+- A Tateru Pro **invite code** (if you don't have one, request access at [tateru.app/beta](https://tateru.app/beta))
+- An **Anthropic API key** (free to create — pay-as-you-go from $0.001 per build) — get one at [console.anthropic.com](https://console.anthropic.com)
+- An Android phone (optional but recommended — without one you can't actually install the apps you build)
+- ~5 GB of free disk space
 
-If you don't have a key yet:
-- [console.anthropic.com](https://console.anthropic.com) → API Keys → create one.
-- Add ~$20 of credits to start. After your first 2–3 builds, the in-app Spec Approval Panel switches to data-driven estimates based on YOUR actual build history.
+Optional but useful:
 
----
-
-## 2. Pick a build mode (sidebar)
-
-| Mode | Best for |
-|---|---|
-| **Discover** | Browse Play Store gaps + opportunities |
-| **AI Spec** | Describe your app in chat — Tateru asks the right questions |
-| **Manual Entry** | You know exactly what you want — fill in a form |
-| **JSON Upload** | Power user — paste a complete app spec |
-| **Clone App** | Drop 1–8 screenshots; GPT-4o reverse-engineers the spec |
-| **Import Project** | Bring an existing `.tateru-project` archive from another machine |
-
-For your first app, **AI Spec** is the friendliest path.
+- An **OpenAI API key** for the icon generator (DALL-E 3) and Clone-from-screenshots feature
 
 ---
 
-## 3. Describe your app (AI Spec mode)
+## 1. Install Tateru (~3 min)
 
-1. Sidebar → **AI Spec**.
-2. Type a 1–2 sentence description: *"A pomodoro timer with statistics and a calming sound library."*
-3. Tateru asks 3–5 follow-up questions (theme, target audience, must-have features).
-4. Click **Build Spec** — your app's blueprint is ready.
-5. Review the spec on the **Brief Review** screen. Toggle features off/on, edit the AI enhancements.
-6. Click **Start Pipeline**.
+Download the latest release for your OS from [github.com/ushanboe/tateru-pro-releases](https://github.com/ushanboe/tateru-pro-releases/releases/latest).
 
----
+| OS | File | What to do |
+|---|---|---|
+| **Linux** | `Tateru.Pro-*.AppImage` | `chmod +x` then double-click |
+| **Linux (Debian/Ubuntu)** | `Tateru.Pro-*-amd64.deb` | `sudo dpkg -i Tateru.Pro-*-amd64.deb` |
+| **macOS** | `Tateru.Pro-*-mac.zip` | Extract → drag to /Applications. First launch: right-click → **Open** to bypass Gatekeeper warning. |
+| **Windows** | `Tateru.Pro-Setup-*.exe` (recommended) | Double-click. Click **More info** → **Run anyway** on the SmartScreen warning. NSIS installer creates Start Menu + Desktop shortcuts. |
 
-## 4. Watch the pipeline (Pipeline page)
-
-10 agents run in sequence. You'll see green checkmarks light up:
-
-1. **Distill** — compress the brief
-2. **Research** — find similar apps + frameworks
-3. **Architect** — assemble the spec
-4. **Docs** — write the build documentation (Doc-Tor)
-5. **Build** — Bob writes the Flutter code
-6. **Icons** — generate app icon (DALL-E 3)
-7. **Post Docs** — write user-facing docs (DocSmith)
-8. **Review** — Agent Orange reviews + fixes
-9. **Test** — generate integration tests
-10. **Audit** — Feature Auditor verifies everything works
-
-Then the **APK** auto-builds (~3–5 min).
-
-**Total: 10–25 min** for a typical app, depending on complexity + chosen models.
+Tateru opens to the **Setup Wizard** on first launch.
 
 ---
 
-## 5. Install on your phone
+## 2. Setup Wizard (~3 min)
 
-When Pipeline page shows **Successfully Compiled Code!** + green Package + Ready tiles:
+The wizard auto-detects what's installed on your machine + asks you for one API key. 6 steps:
 
-1. Plug your Android phone in via USB → enable **USB debugging** (Settings → Developer options).
-2. Click **Install on Android** in Refine App panel.
-3. The APK installs over ADB. Open it on your phone.
-
-**Wireless install** (no cable): Settings → Wireless ADB Pairing → enter the pairing code from your phone's Developer options. Once paired, Install on Android works wirelessly.
-
-**iOS install** (if you're on a Mac with Xcode): Pipeline page → iOS section → pick simulator or your iPhone → Install & Run on iOS.
-
----
-
-## 6. Refine
-
-Spotted something to change? Use the **Refine** panel:
-- Click a preset issue (Themes don't change, Missing back buttons, etc.) → Refine
-- OR type your own instruction: *"Add a dark mode toggle in Settings"* → Refine
-
-Refinement Agent edits files, you Rebuild APK, install again.
+1. **Welcome** — click Get Started.
+2. **Flutter SDK** — auto-detected if installed. If missing, install Flutter from [flutter.dev/docs/get-started/install](https://flutter.dev/docs/get-started/install) (or click Skip — you can install later and come back via Settings).
+3. **Android SDK + Java** — auto-detected. Install Android Studio if missing ([developer.android.com/studio](https://developer.android.com/studio)) — bundles both.
+4. **AI Provider** — pick Anthropic, paste your API key, click Test connection. ✅ green check = good.
+5. **How will you install apps?** — pick Wireless ADB (recommended) or USB Cable.
+6. **Done** — click Continue to Register.
 
 ---
 
-## What can Tateru build well?
+## 3. Register (~1 min)
 
-✅ **Works first try (most builds):**
-- Productivity / habit / utility apps
-- Simple games / calculators
-- Note-taking / journaling
-- BYOK AI chat apps (Anthropic / OpenAI / Gemini)
-- Music players (audio_service / on_audio_query supported)
-- PDF / document chat (on-device LLM via Gemma)
+Sign up with your email + invite code:
 
-🟡 **Works with refinement (1–3 cycles):**
-- Multi-screen apps with custom navigation
-- Apps using camera / mic / location
-- Local SQLite databases
+1. Email + password
+2. Invite code (e.g. `BETA-XXXXXXXX`)
+3. Accept Privacy + Terms checkbox
+4. Click **Sign up**
+5. Welcome email lands in your inbox; 14-day free trial starts
 
-❌ **Hard today (won't be perfect first try):**
-- On-device ML beyond Gemma
-- Real-time multiplayer
-- Payment integration (Stripe / IAP)
-- Complex animations / 3D
+You're now on the Dashboard.
 
 ---
 
-## Where to get help
+## 4. Build your first app (~10–25 min)
 
-- **Send Feedback** (sidebar) — bug reports + feature requests
-- **Ask Bob** — coming soon: Bob the Builder explains code decisions
-- **FAQ** — common questions
-- **User Manual** — comprehensive feature reference
+Sidebar → **AI Spec** → opens the chat-based spec builder.
 
-Or email **support@tateru.app**.
+Type your idea in plain English. Examples that work well for a first build:
 
-Happy building.
+- "A simple tip calculator with split-bill support"
+- "An offline pomodoro timer with daily streak tracking"
+- "A habit tracker for daily routines"
+
+The Spec Chat agent will either:
+
+- **Emit a JSON spec immediately** (if your description was concrete enough) — click "Use this spec"
+- **Ask 2-4 clarifying questions** — answer them, then it produces the spec
+
+You're taken to the **New Project page** with the spec pre-filled. Review it (you can edit features, owner email, etc.), then click **Create Project**.
+
+You land on the **Pipeline page**. Click **Start Pipeline**.
+
+### What happens next
+
+10 named agents run in sequence (you'll see the tile light up green as each completes):
+
+1. Distill (10-30s) — compress the spec
+2. Research (30s-2min) — find similar apps + Flutter packages
+3. Architect (1-5min) — combine sources into a build doc
+4. Docs (3-15min) — write the full spec, file by file
+5. **Spec Approval** — pipeline pauses; review estimated cost + ETA + dependencies → Approve
+6. Build (8-35min) — Bob generates the actual code
+7. Icons (15-30s) — DALL-E generates the app icon
+8. Post Docs (2-5min) — write user-facing docs
+9. Review (5-60min) — Agent Orange reads the code + fixes issues across 1-7 cycles
+10. Test (30s-1min) — generate integration tests
+11. Audit (1-5min) — verify every feature is wired
+
+Then APK build runs (~3-8min).
+
+For a tip calculator: ~15-20 min total, costs ~$3-8.
+
+For a more complex app: ~30-90 min total, costs ~$10-30.
+
+---
+
+## 5. Install the APK on your phone (~2 min)
+
+After the pipeline shows green across all phases + the APK builds successfully:
+
+### Option A — Wireless ADB (no cable)
+
+Set up once:
+
+1. On your Android phone: Settings → About phone → tap **Build Number** 7 times
+2. Settings → Developer Options → **Wireless Debugging** → toggle ON
+3. Wireless Debugging → **Pair device with pairing code**
+4. Note the IP:port + 6-digit pairing code your phone displays
+5. In Tateru: open your project's **Code Workbench** (Pipeline page → **Open Workbench** button, or My Apps → click the row → Workbench tab) → switch to the **Deploy** tab → make sure **Wireless** mode is selected
+6. Fill in the 4 fields (IP address, Pairing port, Pairing code, Connect port — all from your phone screen) → click **Pair & Connect**
+
+Then to install:
+
+7. Back on the Pipeline page → click **Install on Android** → pick your paired device → APK installs
+
+### Option B — USB Cable
+
+1. Plug your phone into your computer
+2. Accept "Allow USB debugging?" on the phone
+3. In Tateru: open your project's **Code Workbench** → **Deploy** tab → switch to **USB Cable** mode → click **Install via USB**, OR back on the Pipeline page click **Install on Android** → pick your USB device
+
+The app appears on your phone's home screen. Open it. You're done.
+
+---
+
+## What's next?
+
+Now that you've built your first app, explore:
+
+- **Refinement Agent** — Pipeline page → Refine App. Type "Add a dark mode toggle" or any other change → 5-15 min later your APK has the change
+- **Different Build Modes** — try Manual Entry for a hand-crafted spec, or Discover to find a Play Store opportunity to clone
+- **Trend Cast** — sidebar → predict your app's launch performance before shipping
+- **Website & Docs** — sidebar → generate a Next.js marketing website you can deploy to Vercel
+- **Push to GitHub** — Pipeline page → push the project source to a new GitHub repo
+
+For deeper detail on every Tateru feature, see:
+
+- [USER_MANUAL.md](USER_MANUAL.md) — comprehensive reference for every UI element
+- [BUILD_MODES_GUIDE.md](BUILD_MODES_GUIDE.md) — deep dive on each of the 6 build modes
+- [GREENTHUMB_GUIDE.md](GREENTHUMB_GUIDE.md) — audit + website + docs flows
+- [TRENDCAST_GUIDE.md](TRENDCAST_GUIDE.md) — launch prediction
+- [SETTINGS_REFERENCE.md](SETTINGS_REFERENCE.md) — every setting field documented
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — common issues + fixes
+- [FAQ.md](FAQ.md) — frequently asked questions
+
+Or just sidebar → **Ask Bob** and ask any question about Tateru directly.
+
+---
+
+## Common first-build issues
+
+**Build keeps hanging on "Doc-Tor"** — switch Doc-Tor to Sonnet 4.6 in Settings → Build Model Config (Haiku is more prone to malformed JSON on long output).
+
+**APK build fails with "cannot find symbol Registrar"** — old `file_picker` package issue. Mod 10.120 (9.32.12+) fixed this. Upgrade to the latest version.
+
+**Wireless ADB pair times out** — pairing code expires after ~60 seconds. Get a fresh one from your phone, retype quickly.
+
+**"Tateru opens to a blank window"** — see [TROUBLESHOOTING.md / Tateru opens to a blank window](TROUBLESHOOTING.md#tateru-opens-to-a-blank-window).
+
+For anything else, sidebar → **Ask Bob**.
+
+---
+
+*Welcome to Tateru. Build something cool.*
