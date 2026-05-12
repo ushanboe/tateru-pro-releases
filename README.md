@@ -14,12 +14,13 @@ This repository hosts the **public release binaries** for Tateru Pro, an AI-driv
 
 | Platform | File | Approx size |
 |---|---|---|
-| Linux x64 | `Tateru.Pro-<version>.AppImage` | ~213 MB |
-| Linux x64 | `tateru-pro-plus_<version>_amd64.deb` | ~131 MB |
-| macOS (Intel + Apple Silicon via Rosetta 2) | `Tateru.Pro-<version>-mac.zip` | ~204 MB |
-| Windows x64 | `Tateru.Pro-<version>-win.zip` | ~230 MB |
+| Linux x64 | `Tateru.Pro-<version>.AppImage` | ~231 MB |
+| Linux x64 | `tateru-pro-plus_<version>_amd64.deb` | ~142 MB |
+| macOS (Intel + Apple Silicon via Rosetta 2) | `Tateru.Pro-<version>-mac.zip` | ~221 MB |
+| Windows x64 (NSIS installer — recommended) | `Tateru.Pro.Setup.<version>.exe` | ~191 MB |
+| Windows x64 (portable .zip) | `Tateru.Pro-<version>-win.zip` | ~247 MB |
 
-> **Note on filenames:** GitHub stores release assets with **dots** in place of spaces. So the file you download is `Tateru.Pro-1.0.0-beta.9.11-mac.zip` (with dots). Once unzipped, the `.app` bundle inside is named `Tateru Pro.app` (with a space) — that's normal.
+> **Note on filenames:** GitHub stores release assets with **dots** in place of spaces. So the file you download is `Tateru.Pro-1.0.0-beta.9.32.14.1-mac.zip` (with dots). Once unzipped, the `.app` bundle inside is named `Tateru Pro.app` (with a space) — that's normal.
 
 Every release ships a `SHA256SUMS-<short-version>` file. Verify with `sha256sum -c SHA256SUMS-<short-version> --ignore-missing`.
 
@@ -47,12 +48,12 @@ The Uninstall sections below are split into **app-only** (preserves your data) a
 
 ```bash
 cd ~/Downloads
-VERSION=1.0.0-beta.9.11   # ← latest as of 2026-05-01; check the Releases page for newer
+VERSION=1.0.0-beta.9.32.14.1   # ← latest as of 2026-05-01; check the Releases page for newer
 curl -LO "https://github.com/ushanboe/tateru-pro-releases/releases/download/v${VERSION}/Tateru.Pro-${VERSION}.AppImage"
 
 # Optional: verify checksum
-curl -LO "https://github.com/ushanboe/tateru-pro-releases/releases/download/v${VERSION}/SHA256SUMS-beta.9.11"
-sha256sum -c SHA256SUMS-beta.9.11 --ignore-missing
+curl -LO "https://github.com/ushanboe/tateru-pro-releases/releases/download/v${VERSION}/SHA256SUMS-beta.9.32.14.1"
+sha256sum -c SHA256SUMS-beta.9.32.14.1 --ignore-missing
 
 # Install libfuse2 if Ubuntu 22.04+ (no longer ships by default)
 sudo apt install libfuse2t64    # Ubuntu 24.04+
@@ -71,7 +72,7 @@ chmod +x "Tateru.Pro-${VERSION}.AppImage"
 ### Option B — Debian package (system install with menu integration)
 
 ```bash
-VERSION=1.0.0-beta.9.11   # ← update to current
+VERSION=1.0.0-beta.9.32.14.1   # ← update to current
 curl -LO "https://github.com/ushanboe/tateru-pro-releases/releases/download/v${VERSION}/tateru-pro-plus_${VERSION}_amd64.deb"
 sudo apt install "./tateru-pro-plus_${VERSION}_amd64.deb"
 
@@ -89,7 +90,7 @@ Open the [latest release](https://github.com/ushanboe/tateru-pro-releases/releas
 
 | Install method | Remove command |
 |---|---|
-| AppImage | `rm "Tateru.Pro-1.0.0-beta.9.11.AppImage"` (just delete the file you downloaded) |
+| AppImage | `rm "Tateru.Pro-1.0.0-beta.9.32.14.1.AppImage"` (just delete the file you downloaded) |
 | Debian package | `sudo apt remove tateru-pro-plus` |
 
 **Factory reset** (also wipes data dir, projects, login, cached models — irreversible):
@@ -117,7 +118,7 @@ rm -rf "$HOME/.config/tateru-pro-plus"
 ```bash
 osascript -e 'quit app "Tateru Pro"' 2>/dev/null   # quit any running version
 
-VERSION=1.0.0-beta.9.11   # ← update to current
+VERSION=1.0.0-beta.9.32.14.1   # ← update to current
 cd ~/Downloads
 curl -LO "https://github.com/ushanboe/tateru-pro-releases/releases/download/v${VERSION}/Tateru.Pro-${VERSION}-mac.zip"
 unzip -q "Tateru.Pro-${VERSION}-mac.zip"
@@ -168,59 +169,89 @@ For the deeper Mac guide (fast-reset cycle for testing, troubleshooting, Console
 
 ## Install — Windows x64
 
-> **Unsigned during beta** — SmartScreen will warn on first launch. "More info → Run anyway" is the bypass.
+> **Unsigned during beta** — SmartScreen will warn on first launch. Click **More info** → **Run anyway** to proceed (one-time per install). We're adding code-signing for the 1.0 release to remove this prompt entirely. Full bypass walkthrough below.
 
-### Quick install (PowerShell)
+Two install paths — pick one:
+
+| Option | Best for | Start Menu icon? | Auto-uninstall? |
+|---|---|---|---|
+| **A — NSIS installer** (recommended) | Most users | ✅ Yes | ✅ Settings → Apps → Uninstall |
+| **B — Portable .zip** | Power users, side-by-side versions, no admin | ❌ No (manual shortcut) | ❌ Delete folder manually |
+
+### Option A — NSIS installer (recommended; adds Start Menu icon)
+
+#### Quick install (PowerShell)
 
 ```powershell
-$VERSION = "1.0.0-beta.9.11"   # ← update to current
+$VERSION = "1.0.0-beta.9.32.14.1"   # ← update to current
 
-# Download (no auth needed)
+Invoke-WebRequest `
+  -Uri "https://github.com/ushanboe/tateru-pro-releases/releases/download/v$VERSION/Tateru.Pro.Setup.$VERSION.exe" `
+  -OutFile "$env:USERPROFILE\Downloads\Tateru-Pro-Setup-$VERSION.exe"
+
+# Run the installer (SmartScreen warning will appear — see below)
+& "$env:USERPROFILE\Downloads\Tateru-Pro-Setup-$VERSION.exe"
+```
+
+#### Quick install (GUI)
+
+1. Open the [latest release](https://github.com/ushanboe/tateru-pro-releases/releases/latest) in Edge or Chrome.
+2. Click `Tateru.Pro.Setup.<version>.exe` to download (~191 MB).
+3. Double-click the downloaded `.exe` → SmartScreen warning appears (see bypass below).
+4. The NSIS installer opens — choose installation directory (default: `%LOCALAPPDATA%\Programs\Tateru Pro`).
+5. Click **Install** → wait ~30 seconds → click **Finish**.
+6. Launch from **Start Menu → Tateru Pro** (proper icon + shortcut included).
+
+### Option B — Portable .zip (no installer, no Start Menu integration)
+
+Use this if you prefer not to run an installer, want multiple side-by-side versions, or don't have install permissions.
+
+#### Quick install (PowerShell)
+
+```powershell
+$VERSION = "1.0.0-beta.9.32.14.1"   # ← update to current
+
 Invoke-WebRequest `
   -Uri "https://github.com/ushanboe/tateru-pro-releases/releases/download/v$VERSION/Tateru.Pro-$VERSION-win.zip" `
   -OutFile "$env:USERPROFILE\Downloads\Tateru-Pro-$VERSION-win.zip"
 
-# Extract to %LOCALAPPDATA%\Programs\Tateru Pro (or any folder you choose)
 Expand-Archive `
   -Path "$env:USERPROFILE\Downloads\Tateru-Pro-$VERSION-win.zip" `
   -DestinationPath "$env:LOCALAPPDATA\Programs\Tateru Pro"
 
-# Run
 & "$env:LOCALAPPDATA\Programs\Tateru Pro\win-unpacked\Tateru Pro.exe"
 ```
 
-### Quick install (GUI)
+#### Quick install (GUI)
 
 1. Open the [latest release](https://github.com/ushanboe/tateru-pro-releases/releases/latest) in Edge or Chrome.
-2. Click `Tateru.Pro-<version>-win.zip` to download (~230 MB).
+2. Click `Tateru.Pro-<version>-win.zip` to download (~247 MB).
 3. Right-click the downloaded zip → **Extract All** → choose a destination folder (e.g. `C:\Tateru Pro\`).
 4. Open the extracted folder → enter the `win-unpacked` subfolder → double-click `Tateru Pro.exe`.
 
 (Optional) Right-click `Tateru Pro.exe` → **Send to** → **Desktop (create shortcut)** for a launcher icon.
 
-### First launch — SmartScreen bypass
+### First launch — SmartScreen bypass (both options)
 
-Windows Defender SmartScreen blocks unsigned binaries by default:
+Windows Defender SmartScreen blocks unsigned binaries by default. Whichever option you used, on first launch:
 
-1. Double-click `Tateru Pro.exe` → blue *"Windows protected your PC"* dialog appears.
+1. Run the `.exe` → blue *"Windows protected your PC"* dialog appears.
 2. Click **More info** (small text under the message).
 3. Click the **Run anyway** button that appears.
-4. App launches; subsequent launches skip the warning.
+4. App launches normally; **subsequent launches skip the warning**.
 
-If SmartScreen is set to **Block** (some corporate policies), the **Run anyway** button won't appear. Workaround: right-click the `.exe` → **Properties** → tick **Unblock** at the bottom → **OK** → re-run.
+If SmartScreen is set to **Block** (some corporate / enterprise policies), the **Run anyway** button won't appear. Workaround: right-click the `.exe` → **Properties** → tick **Unblock** at the bottom → **OK** → re-run.
+
+**Why the warning?** Tateru Pro's binaries aren't yet code-signed (signing certificates cost $300–500/year for Extended Validation). We're adding **Azure Trusted Signing** in the 1.0 release — this eliminates the SmartScreen prompt entirely. For now, the bypass above is a one-time click per install.
 
 ### Uninstall — Windows
 
 **App-only** (preserves your projects, login, and license):
 
-Delete the folder where you extracted the zip.
-
-```powershell
-# If you extracted to %LOCALAPPDATA%\Programs\Tateru Pro per the install above:
-Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Tateru Pro"
-```
-
-Or via File Explorer: navigate to the extracted folder → right-click → Delete.
+| Install method | Uninstall steps |
+|---|---|
+| **Option A — NSIS installer** | Open **Settings → Apps → Installed apps** → find **Tateru Pro** → **⋯** → **Uninstall**. (Or via Control Panel → **Programs and Features** → **Tateru Pro** → **Uninstall**.) |
+| **Option B — Portable .zip** | Delete the folder where you extracted the zip: <br>`Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Tateru Pro"` |
 
 **Factory reset** (also wipes data dir, projects, login, cached models — irreversible):
 
@@ -228,13 +259,14 @@ Or via File Explorer: navigate to the extracted folder → right-click → Delet
 # Stop the app if it's running
 Stop-Process -Name "Tateru Pro" -Force -ErrorAction SilentlyContinue
 
-# Delete the extracted bundle
-Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Tateru Pro"
+# 1. Uninstall the app
+#    - If installed via NSIS: use Settings → Apps as above (recommended — runs the proper uninstaller)
+#    - If portable .zip: Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Tateru Pro"
 
-# Wipe data dir (DB, projects, built APKs, license cache)
+# 2. Wipe data dir (DB, projects, built APKs, license cache)
 Remove-Item -Recurse -Force "$env:APPDATA\tateru-pro-plus"
 
-# Wipe cloud-client cache (JWT, offline queue)
+# 3. Wipe cloud-client cache (JWT, offline queue)
 Remove-Item -Recurse -Force "$env:USERPROFILE\.tateru-pro"
 ```
 
@@ -242,8 +274,9 @@ To also remove your stored LLM API keys: open **Credential Manager** (Start → 
 
 ### Known Windows-specific notes
 
-- **No `.exe` installer / NSIS** — cross-compiling from Linux requires Wine on the build host. Currently shipping as `.zip` until 1.0.
-- **No auto-updater on Windows yet** — manual download of new releases required.
+- **NSIS installer first shipped in 9.32.13** (mod 10.119 — adds the Start Menu icon and proper Add/Remove Programs entry). Earlier versions are portable .zip only.
+- **Code signing planned for 1.0** via Azure Trusted Signing — will remove the SmartScreen warning permanently.
+- **No auto-updater on Windows yet** — manual download of new releases required (Releases page → download → install/extract over existing).
 
 ---
 
@@ -259,7 +292,8 @@ Tateru Pro is under active development. Patch releases ship on a roughly daily c
 |---|---|
 | Android APK | ✅ Production-ready |
 | macOS `.app` | 🧪 Experimental (Mac host required) |
-| iOS `.app` | 🧪 Experimental, compile-only (signing + iPhone install coming) |
+| iOS `.app` | ✅ Working — one-click signed iPhone install via Tateru (Mac host + Apple Developer account required) |
+| iOS Simulator | ✅ Working — auto-boot + auto-launch (Mac host required) |
 
 See [tateru.app/quick-start](https://tateru.app/quick-start) for the full walkthrough.
 
