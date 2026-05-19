@@ -12,15 +12,36 @@ A 10-minute walkthrough from "downloaded the installer" to "Android APK on your 
 
 ---
 
-## 0. Prerequisites
+## 0. Prerequisites — INSTALL THESE FIRST
 
-Before you start:
+> ⚠️ **The #1 reason fresh-install beta testers get stuck is missing or wrong-version dependencies.** Tateru's setup wizard checks for these on launch and refuses to proceed if any are missing. Install + verify each one BEFORE first-launching Tateru.
+
+### Required apps (must install before Tateru)
+
+| Required | Version | Install from |
+|---|---|---|
+| **Flutter SDK** | **3.41.9** (NOT 3.44.0 — known `flutter create` bug) | https://docs.flutter.dev/get-started/install |
+| **Android Studio** | Latest stable — **must open once after install** to download SDK (~3 GB) | https://developer.android.com/studio |
+| **Java JDK** | Temurin 17 LTS (or accept Android Studio's bundled JBR) | https://adoptium.net/temurin/releases/ |
+| **Git** | Latest | https://git-scm.com/downloads |
+
+**Important notes:**
+
+- **Flutter 3.44.0 is broken** — has a `flutter create` pubspec.lock-path bug that crashes every first APK build. Stick to 3.41.9 until Flutter team patches the 3.44 line.
+- **Android Studio: open it once after install** — the IDE is just the shell; the actual SDK is downloaded by the first-launch wizard. Skip this step and Tateru's detection will fail.
+- **Java JDK is optional if Android Studio is installed** — Tateru auto-detects Android Studio's bundled JBR. Install Temurin standalone only if you skipped Android Studio.
+
+If Tateru's setup wizard says any of these are missing or wrong-version, fix them BEFORE filing a bug — 90% of the time the env is the issue, not Tateru.
+
+For complete uninstall + clean reinstall recipes (all 4 dependencies + Tateru itself, per OS), see [Reset and Reinstall guide](RESET_AND_REINSTALL.md).
+
+### Everything else you'll need
 
 - A computer running Linux, macOS, or Windows (64-bit)
 - A Tateru Pro **invite code** (if you don't have one, request access at [tateru.app/beta](https://tateru.app/beta))
 - An **Anthropic API key** (free to create — pay-as-you-go from $0.001 per build) — get one at [console.anthropic.com](https://console.anthropic.com)
 - An Android phone (optional but recommended — without one you can't actually install the apps you build)
-- ~5 GB of free disk space
+- ~5 GB of free disk space (PLUS ~10 GB for Flutter SDK + Android Studio + SDK components — total ~15 GB)
 
 Optional but useful:
 
