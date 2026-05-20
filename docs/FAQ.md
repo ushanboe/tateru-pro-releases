@@ -54,28 +54,53 @@ You can absolutely run Tateru with OpenAI or Gemini — many agents work great. 
 
 ## What kinds of apps can Tateru build?
 
-✅ **Works well:**
-- Productivity / habit / utility apps
-- Note-taking / journaling
-- Calculators / timers / converters
-- Music players (audio_service, just_audio_background, on_audio_query supported)
-- BYOK AI chat apps (Claude / OpenAI / Gemini)
-- PDF / document chat (on-device LLM via Gemma)
-- Simple games (calculator + ping pong was real)
-- Multi-screen browsing apps
+Tateru builds **native Flutter apps** — real Android APKs you can install on a
+phone, and (on a Mac, with an Apple Developer account) real iPhone builds
+installed directly via Tateru. Custom app icons are generated and applied
+across Android + iOS automatically.
 
-🟡 **Works with refinement (1–3 cycles):**
-- Complex navigation patterns
-- Apps using camera / mic / location / biometrics
-- Local SQLite databases with custom schemas
-- Custom theming + animations
+✅ **Works well** — these are the categories Tateru has built end-to-end and
+installed on real devices, usually first-try or close to it:
 
-❌ **Not yet:**
-- On-device ML beyond Gemma 4 E2B
-- Real-time multiplayer
-- Stripe / Apple IAP / Google Play Billing
-- Heavy 3D / game-engine apps
-- Native iOS-only features (Tateru's Flutter pipeline is Android-first)
+- **Productivity, habit & utility apps** — trackers, planners, checklists, mood/
+  petty-wins loggers, daily-routine tools
+- **Note-taking & journaling** — text + voice notes, tagging, search, local
+  storage; voice-recorder journals with on-device transcription
+- **Calculators, timers, converters** — tip/loan/unit calculators, countdown &
+  interval timers, pomodoro-style focus apps
+- **Music & audio players** — full iPod-style players with click wheel, library
+  scanning, playlists, background playback + lock-screen controls
+  (`audio_service` / `just_audio_background` / `on_audio_query` are auto-wired),
+  album-art lookup, and AI track synopsis
+- **Audio recording & monitoring apps** — record, waveform/amplitude display,
+  playback, share
+- **BYOK AI chat & assistant apps** — bring your own Claude / OpenAI / Gemini /
+  OpenRouter key; streaming chat, per-app system prompts
+- **On-device AI apps** — document / PDF chat and offline assistants running
+  against Gemma (LiteRT-LM), no cloud key required
+- **GPS, maps & location apps** — route tracking, location logging, map display
+- **Camera, photo & sensor apps** — capture, gallery, accelerometer/gyroscope-
+  driven features
+- **Simple games & playful apps** — coin-flip / dice / decision makers,
+  calculator-plus-mini-game mashups, animated reveal/flip mechanics
+- **Lifestyle & content apps** — divination/horoscope engines, generators,
+  multi-screen browsing + CRUD apps over a local database
+- **Skeuomorphic / device-mockup UIs** — retro-device, calculator-face, and
+  control-panel layouts that scale correctly to any phone
+- **Marketing websites & docs** — via GreenThumb: an audit + an auto-generated
+  Next.js marketing site + Privacy / Terms / Quick Start / User Manual
+
+🟡 **Works with refinement (1–3 Diagnose → Refine cycles):**
+- Complex multi-screen navigation patterns
+- Camera / microphone / location / biometrics permission flows (especially the
+  iOS Info.plist side)
+- Local SQLite databases with custom schemas + migrations
+- Heavy custom theming, animations, and gesture handling
+- Background services and notifications
+
+If a build hits a snag, the in-app **Diagnose** button matches it against
+Tateru's library of 140+ documented fixes and the **Refinement Agent** applies
+the change — most issues clear in one or two cycles.
 
 ---
 

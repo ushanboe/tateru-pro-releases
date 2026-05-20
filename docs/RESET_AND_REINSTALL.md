@@ -9,7 +9,7 @@
 # Reset and Reinstall — Complete Fresh-Install Guide
 
 Step-by-step recipes for **completely removing Tateru Pro and all its build
-dependencies** (Flutter SDK, Android SDK + Studio, Java JDK, Git), then
+dependencies** (Flutter SDK, Android SDK + Studio, Java JDK, Git, Node.js), then
 reinstalling cleanly. Useful for:
 
 - Testing a brand-new install path before the BetaList traffic lands
@@ -29,12 +29,16 @@ refuses to launch the pipeline if any are missing.
 | **Android Studio** | Latest stable — **must open once after install** to download SDK (~3 GB) | https://developer.android.com/studio |
 | **Java JDK** | Temurin 17 LTS (or accept Android Studio's bundled JBR) | https://adoptium.net/temurin/releases/ |
 | **Git** | Latest | https://git-scm.com/downloads |
+| **Node.js + npm** | LTS (18 or newer) — required for GreenThumb (marketing website + docs) | https://nodejs.org/en/download |
+| **Windows only: Developer Mode** | Must be **ON** — Flutter needs it for symlink support, or APK builds fail | Settings → Privacy & security → For developers → **Developer Mode = On** |
 
 **Common gotchas:**
 
 - **Flutter 3.44.0 is broken** — has a `flutter create` pubspec.lock-path bug that crashes every first APK build. Pin to 3.41.9.
 - **Android Studio: open it once after install** — the IDE is just the shell; the actual SDK is downloaded by the first-launch wizard. Skip this step and Tateru's detection will fail.
 - **Java JDK is optional if Android Studio is installed** — Tateru auto-detects Android Studio's bundled JBR.
+- **Node.js is only needed for GreenThumb** — the marketing-website + docs generator runs `npm install` + a Next.js preview server. The Flutter app build itself does NOT need Node. Install it before using GreenThumb.
+- **Windows Developer Mode is required to build** — on a fresh Windows install the first build shows a symlink-permission warning until Developer Mode is on (link above). This is a Flutter requirement.
 
 > ⚠ Most beta testers will **NOT** need a full reset. Tateru's SetupWizard
 > + Settings → SDK Paths can detect, persist, and self-heal stale paths.
