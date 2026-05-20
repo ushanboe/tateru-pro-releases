@@ -42,6 +42,31 @@ The Uninstall sections below are split into **app-only** (preserves your data) a
 
 ---
 
+## ⚠ Install these BEFORE Tateru (required prerequisites)
+
+**The #1 reason fresh installs get stuck is missing or wrong-version dependencies.** Tateru's setup wizard checks for these on launch and refuses to build if any are missing. Install + verify each one **before** first-launching Tateru:
+
+| Required | Version | Install from |
+|---|---|---|
+| **Flutter SDK** | **3.41.9** (NOT 3.44.0 — known `flutter create` bug) | https://docs.flutter.dev/get-started/install |
+| **Android Studio** | Latest stable — **open it once after install** to download the SDK (~3 GB) | https://developer.android.com/studio |
+| **Java JDK** | Temurin 17 LTS (or accept Android Studio's bundled JBR) | https://adoptium.net/temurin/releases/ |
+| **Git** | Latest | https://git-scm.com/downloads |
+| **Node.js + npm** | LTS (18 or newer) — required for GreenThumb (marketing website + docs) | https://nodejs.org/en/download |
+| **Windows only: Developer Mode** | Must be **ON** — Flutter needs it for symlink support, or APK builds fail | Settings → Privacy & security → For developers → **Developer Mode = On** |
+
+**Notes:**
+
+- **Flutter must be 3.41.9** — 3.44.0 has a `flutter create` bug that crashes the first APK build. Pin to 3.41.9.
+- **Open Android Studio once** after installing — the IDE is just the shell; the first-launch wizard downloads the actual SDK. Skip this and detection fails.
+- **Java is optional if you installed Android Studio** — Tateru auto-detects its bundled JBR. Install Temurin standalone only if you skipped Android Studio.
+- **Node.js is only for GreenThumb** — the marketing-website/docs generator runs `npm install` + a Next.js preview. The app build itself does NOT need Node. Install it before using GreenThumb.
+- **Windows Developer Mode is required to build** — a fresh Windows install shows a symlink-permission warning on the first build until Developer Mode is on. This is a Flutter requirement, not a Tateru one.
+
+Full per-OS uninstall + clean-reinstall recipes for every dependency: see [docs/RESET_AND_REINSTALL.md](https://github.com/ushanboe/tateru-pro-releases/blob/main/docs/RESET_AND_REINSTALL.md).
+
+---
+
 ## Install — Linux x64
 
 ### Option A — AppImage (no install, single-file portable)
