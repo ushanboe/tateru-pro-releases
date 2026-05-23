@@ -19,9 +19,10 @@ The Settings page is one long scrollable form. Sections appear in this order in 
 5. [SDK Paths](#sdk-paths)
 6. [Telegram Notifications](#telegram-notifications)
 7. [Build Learnings](#build-learnings)
-8. [System Info](#system-info)
-9. [Diagnostics](#diagnostics)
-10. [About](#about)
+8. [Cloud Sauce indicator](#cloud-sauce-indicator)
+9. [System Info](#system-info)
+10. [Diagnostics](#diagnostics)
+11. [About](#about)
 
 ---
 
@@ -341,6 +342,70 @@ Below the toggle, every local rule:
 - **Delete** button — removes from local-mistakes.md AND from cloud queue (if shared)
 
 Rules are loaded into Bob's prompt on every build — so each rule actively prevents the matched bug from reoccurring in your future projects.
+
+---
+
+## Cloud Sauce indicator
+
+A small LED-style pill below the app version in the sidebar that shows whether the **latest** authoritative build rules (`MISTAKES.md` + `CURATED_PACKAGES.md`) from Tateru's cloud vault are in use.
+
+**Hidden by default.** The pill renders nothing unless you opt in via the `CLOUD_RULES` environment flag — normal Tateru builds are unaffected.
+
+### What it is
+
+Bob the Builder needs a catalogue of "known anti-patterns" + "recommended packages" to write good Flutter code. Today that catalogue ships **inside the binary** (every install has it, immutable until the next Tateru release). The Cloud Sauce path pulls the same catalogue **from an authenticated cloud vault** instead, so:
+
+- New learnings reach you between Tateru releases (typically days, not weeks)
+- The catalogue stays out of the public download binary
+- Pro Annual users (Private Build Mode) can still pull — telemetry stays off
+
+This is gated by the `CLOUD_RULES` flag while we dogfood the path. Once stable across Linux/Mac/Windows it'll become the default (planned for Tateru ≥ 9.34).
+
+### LED states
+
+| Colour | Pill text | Meaning |
+|---|---|---|
+| ⚪ (hidden) | — | `CLOUD_RULES` flag is OFF (the default). Bob uses the bundled rules — byte-for-byte the current behaviour. |
+| 🟡 amber | `Cloud sauce · not downloaded` + **Pull** | Flag is ON but no local cache yet. Click **Pull** to download (one-time, ~1MB; authenticated via your Tateru license). |
+| 🟢 emerald | `Cloud sauce vN · latest` | Flag is ON, cache present, **and** the cloud reports your cached version matches the latest validated rules. You're current. |
+| 🟠 amber | `Cloud sauce vN · update available` + **Pull** | Flag is ON, cache present, cloud has a newer version. Click **Pull** to refresh. Next build uses the updated rules. |
+| 🔵 sky | `Cloud sauce vN · offline` | Flag is ON, cache present, but cloud version-check failed (offline, network blocked, or the cloud version endpoint isn't reachable). Cache still works — Bob loads from disk; we just can't confirm "latest" without a verified comparison. **Honest UX:** never claims "latest" without proof. |
+
+The pill re-checks the cloud on **window focus**, throttled to once per 60 seconds. No background polling. The **Pull** button shows `Pulling rules…` while the request is in flight.
+
+### How to enable (dogfood)
+
+1. Open your user data .env file:
+   - **Linux:** `~/.config/tateru-pro-plus/.env`
+   - **macOS:** `~/Library/Application Support/tateru-pro-plus/.env`
+   - **Windows:** `%APPDATA%/tateru-pro-plus/.env`
+2. Add (or change) the line: `CLOUD_RULES=1`
+3. Restart Tateru. The pill appears below the version number in the sidebar.
+4. First state will be 🟡 **not downloaded**. Click **Pull** — pill flips to "Pulling rules…", then 🟢 **latest** (or 🔵 **offline** if the cloud version endpoint isn't deployed yet for your install — see Troubleshooting).
+
+### How to disable
+
+Remove the `CLOUD_RULES=1` line (or set `CLOUD_RULES=0`), then restart. The pill disappears and Bob falls back to bundled `MISTAKES.md` + `CURATED_PACKAGES.md`.
+
+### Where the cache lives
+
+`~/.tateru-pro/data/cloud-cache/` (or your `TATERU_DATA_DIR` override) contains:
+
+- `MISTAKES.md` — pulled rule library (replaces bundled when `CLOUD_RULES=1`)
+- `CURATED_PACKAGES.md` — pulled package recommendations (replaces bundled when `CLOUD_RULES=1`)
+- `rules.version.json` — `{ mistakes, curated, fetchedAt }` — drives the LED state
+
+Safe to delete the cache dir at any time. With `CLOUD_RULES=1` the pill returns to 🟡 **not downloaded**; with the flag OFF the deletion has no effect.
+
+### Pro Annual + Private Build Mode
+
+The pill works identically for Pro Annual users — pulling rules is **inbound** traffic (no telemetry shared), so Private Build Mode doesn't restrict it. You still benefit from the latest community-validated rules; you just don't share back yourself.
+
+### Common questions
+
+- **"I clicked Pull and got 🔵 offline instead of 🟢 latest"** → Cache was populated successfully (you'd see 🟡 if it had failed). The cloud's cheap version-check endpoint (`/api/v1/rules/version`) just isn't reachable from your install yet. As of the most recent dev tree, the endpoint hasn't been deployed to Railway — see Troubleshooting for details. Bob is still using the new cached rules in the meantime.
+- **"Pull button does nothing"** → Check Tateru cloud auth. The pull requires a valid license JWT (same auth as the rest of the cloud). Sign out + back in if needed.
+- **"I want to revert to bundled rules"** → Set `CLOUD_RULES=0` (or remove the line) + restart. The cache is left on disk but ignored.
 
 ---
 

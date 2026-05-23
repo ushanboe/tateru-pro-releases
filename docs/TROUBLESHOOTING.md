@@ -19,11 +19,12 @@ User-friendly recipes for the most common things that go wrong, organized by sym
 5. [Send to Phone (Android)](#send-to-phone-android)
 6. [iOS issues (Mac)](#ios-issues-mac)
 7. [GreenThumb (audit + website)](#greenthumb-audit--website)
-8. [Send Feedback / Ask Bob](#send-feedback--ask-bob)
-9. [Login / billing / subscription](#login--billing--subscription)
-10. [Performance + disk space](#performance--disk-space)
-11. [Specific error messages — alphabetical lookup](#specific-error-messages--alphabetical-lookup)
-12. [Still stuck?](#still-stuck)
+8. [Cloud Sauce indicator (sidebar pill)](#cloud-sauce-indicator-sidebar-pill)
+9. [Send Feedback / Ask Bob](#send-feedback--ask-bob)
+10. [Login / billing / subscription](#login--billing--subscription)
+11. [Performance + disk space](#performance--disk-space)
+12. [Specific error messages — alphabetical lookup](#specific-error-messages--alphabetical-lookup)
+13. [Still stuck?](#still-stuck)
 
 ---
 
@@ -329,6 +330,66 @@ If on 9.32.x+ and still no download: check your browser's downloads folder — t
 
 ---
 
+## Cloud Sauce indicator (sidebar pill)
+
+The small LED-style pill below the app version in the sidebar shows whether the **latest** authoritative build rules (`MISTAKES.md` + `CURATED_PACKAGES.md`) from Tateru's cloud vault are in use. **Hidden by default** — only appears when you've opted into the `CLOUD_RULES` flag.
+
+See [Settings → Cloud Sauce indicator](SETTINGS_REFERENCE.md#cloud-sauce-indicator) for full state table + enable instructions. Common issues below.
+
+### Pill doesn't appear in the sidebar
+
+Expected — it's off by default. To enable, add `CLOUD_RULES=1` to your user data .env:
+
+- **Linux:** `~/.config/tateru-pro-plus/.env`
+- **macOS:** `~/Library/Application Support/tateru-pro-plus/.env`
+- **Windows:** `%APPDATA%/tateru-pro-plus/.env`
+
+Restart Tateru after editing.
+
+### Pill stays on 🔵 "offline" after clicking Pull (cache populated, but never reaches 🟢 "latest")
+
+This is the most common state for dogfood installs as of the most recent dev tree. The cache pulled successfully (you'd see 🟡 **not downloaded** if it had failed) — Bob IS loading your freshly-pulled rules. The pill just can't verify "latest" because the cloud's cheap version-check endpoint (`GET /api/v1/rules/version`) isn't reachable from your install.
+
+**Why:** As of 2026-05-23 the new `/version` endpoint hasn't been deployed to Railway yet. Once it ships, the pill will flip to 🟢 **latest** on the next window-focus check (within 60 seconds).
+
+**Workaround:** none needed — the rules are working. The pill is being honest about not being able to confirm "latest" without verification. This is the **no-false-positive design** — we'd rather show 🔵 offline than mislead you into thinking you're current when we don't actually know.
+
+### 🟡 "not downloaded" — Pull button does nothing / spins forever
+
+Pull requires a valid Tateru license JWT (same auth as logging in). If pull fails silently:
+
+1. Open Settings → Account. Confirm tier shows ACTIVE (not EXPIRED / CANCELLED).
+2. Click Refresh in the Account panel. Try Pull again.
+3. If still failing, sign out + sign back in. License JWT will refresh.
+4. If you're behind a corporate proxy / firewall blocking `api.tateru.app`, the pull will fail until the network is reachable.
+
+### Pill shows 🟠 "update available" even though I just pulled
+
+This means another newer rule version was published between your pull and the next version-check (window focus or 60s tick). Click **Pull** again — pill will flip to 🟢 **latest**.
+
+If it keeps reverting to 🟠 immediately after every pull, that's a bug — please send feedback (sidebar → Send Feedback) with your cached version (`~/.tateru-pro/data/cloud-cache/rules.version.json`).
+
+### I want to revert to bundled rules
+
+Set `CLOUD_RULES=0` (or delete the line) in your user data .env. Restart Tateru. The pill disappears and Bob falls back to the bundled `MISTAKES.md` + `CURATED_PACKAGES.md` that shipped with this Tateru version. The cache on disk is harmless and can be ignored or deleted.
+
+### Cache seems corrupted — delete and re-pull
+
+Delete the `cloud-cache/` directory inside your user data dir:
+
+```bash
+# Linux
+rm -rf ~/.tateru-pro/data/cloud-cache/
+# macOS
+rm -rf "$HOME/Library/Application Support/tateru-pro-plus/data/cloud-cache/"
+# Windows (PowerShell)
+Remove-Item -Recurse -Force "$env:APPDATA\tateru-pro-plus\data\cloud-cache"
+```
+
+Restart Tateru. Pill returns to 🟡 **not downloaded**. Click Pull to repopulate.
+
+---
+
 ## Send Feedback / Ask Bob
 
 ### "Feedback form not configured yet" warning
@@ -451,6 +512,10 @@ Setup Wizard didn't detect Flutter. See [Setup Wizard issues / Flutter not detec
 ### `cannot find symbol: class Registrar`
 
 Either `file_picker 5.x/6.x` (Bob's SAFE_VERSIONS should pin to ^8.1.7) or `record 5.x` pulling in `record_linux 0.7.2`. See [APK build issues](#apk-build-gradle-issues) above.
+
+### `Cloud sauce vN · offline` after a successful Pull
+
+Cache populated, but cloud version-check endpoint isn't reachable from your install. As of 2026-05-23 the `/api/v1/rules/version` endpoint isn't deployed to Railway yet — your cached rules ARE working; the pill just can't confirm "latest" without verification. See [Cloud Sauce indicator](#cloud-sauce-indicator-sidebar-pill) above.
 
 ### `Expected ':' on line N column 1` (in pubspec.yaml)
 

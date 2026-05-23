@@ -194,6 +194,20 @@ Tateru's sidebar is grouped into 6 sections. Each item links to a screen.
 | **Dashboard** | Home page — recent activity, project counts, system health, quick links to common actions. |
 | **My Apps** | List of every project you've built or imported. Sortable, searchable, click any row to open its Pipeline page. |
 
+#### Above the top group — version + Cloud Sauce indicator
+
+The sidebar header shows **`v1.0.0-beta.X.Y.Z`** under the **tateru PRO** logo — that's the version of Tateru you're running (auto-updates when you upgrade).
+
+Directly below the version you may see a small **LED-style "Cloud sauce" pill** (a coloured dot + short text). This is the Cloud Rules indicator — it tells you whether the **latest** authoritative build rules are pulled from Tateru's cloud vault, or whether you're running the bundled rules that shipped with this Tateru version.
+
+**Default: the pill is hidden** — Tateru uses the bundled rules baked into the binary. To opt into pulling cloud rules between releases, set `CLOUD_RULES=1` in your user data .env (see [Settings → Cloud Sauce indicator](SETTINGS_REFERENCE.md#cloud-sauce-indicator) for the full state table and dogfood instructions).
+
+Pill states (when visible):
+- 🟡 **not downloaded** + Pull button → click to fetch
+- 🟢 **vN · latest** → cloud confirms you have the latest validated rules
+- 🟠 **vN · update available** + Pull button → a newer rule version exists
+- 🔵 **vN · offline** → cache present but cloud version-check unreachable (cache still works)
+
 ### Build Modes
 
 Six ways to start a NEW app project. Each opens the New Project page in a different mode — see [Build Modes](#build-modes--six-ways-to-start-a-project) below.
