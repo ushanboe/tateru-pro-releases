@@ -49,7 +49,22 @@ while [[ $# -gt 0 ]]; do
     --no-launch)  NO_LAUNCH=1; shift ;;
     --version=*)  PINNED_VERSION="${1#--version=}"; shift ;;
     -h|--help)
-      sed -n '2,40p' "$0" | sed 's/^# //; s/^#//'
+      cat <<'EOF'
+Tateru Pro one-line installer (Linux + macOS).
+
+Usage:
+  curl -fsSL https://tateru.app/install | bash
+  curl -fsSL https://tateru.app/install | bash -s -- [flags]
+
+Flags:
+  --deb              Linux only — install the .deb (requires sudo, apt-managed updates)
+  --no-launch        Don't auto-launch the app after install
+  --version=X.Y.Z    Install a specific version (default: latest)
+  -h, --help         This help text
+
+Full source + review:
+  https://raw.githubusercontent.com/ushanboe/tateru-pro-releases/main/install.sh
+EOF
       exit 0
       ;;
     *) echo "Unknown arg: $1 (see --help)" >&2; exit 1 ;;
