@@ -254,13 +254,62 @@ fi
 # ----------------------------------------------------------------------
 # 5. Purge user data (only with --purge)
 # ----------------------------------------------------------------------
+PURGE_FAILED=0
+FAILED_PATHS=""
+
 if [ "$PURGE" -eq 1 ]; then
   head "Purging user data"
+
+  # Kill lingering Tateru-spawned processes that may hold files open in
+  # $HOME/.tateru-pro/ — notably the Next.js dev servers GreenThumb spawns
+  # for marketing-site previews (mod 10.183). Without this, "rm -rf" can
+  # fail with "Directory not empty" when a child is actively writing.
+  # All pkills are best-effort (|| true) so missing processes don't fail.
+  pkill -f "/opt/Tateru Pro/"     2>/dev/null || true
+  pkill -f "Tateru Pro.*AppImage" 2>/dev/null || true
+  pkill -f "tateru-pro-plus"       2>/dev/null || true
+  pkill -f "$HOME/.tateru-pro"     2>/dev/null || true
+  pkill -f "$HOME/.config/${PKG}"  2>/dev/null || true
+  sleep 1  # let the kills propagate so file handles release before rm
+
   for d in "${DATA_DIRS[@]}"; do
     [ -e "$d" ] || continue
-    rm -rf "$d" && say "removed $d"
+    # Try rm -rf — succeeds in 99% of cases (no held handles, normal perms).
+    if rm -rf "$d" 2>/dev/null; then
+      say "removed $d"
+      continue
+    fi
+    # Retry once after a brief wait — sometimes a process is mid-shutdown.
+    sleep 1
+    if rm -rf "$d" 2>/dev/null; then
+      say "removed $d (after retry)"
+      continue
+    fi
+    # Real failure — record + report so the final message tells the truth.
+    PURGE_FAILED=1
+    FAILED_PATHS="${FAILED_PATHS}|$d"
+    say "⚠ couldn't fully remove $d"
+    # Surface the precise error for the user (re-run without 2>/dev/null
+    # so they see the "Directory not empty" / permission denied / etc.).
+    rm -rf "$d" 2>&1 | sed 's/^/    /' || true
   done
-  say "done — this machine is now at a clean-slate state."
+
+  if [ "$PURGE_FAILED" -eq 0 ]; then
+    say "done — this machine is now at a clean-slate state."
+  else
+    echo
+    say "⚠ Purge incomplete — some user data remained:"
+    # Re-split the | -delimited path list (avoids needing a bash array shuffle).
+    IFS='|' read -ra FAILED_ARR <<< "${FAILED_PATHS#|}"
+    for p in "${FAILED_ARR[@]}"; do
+      say "    • $p"
+    done
+    echo
+    say "Likely cause: a Tateru-spawned process (e.g. a Next.js dev server"
+    say "from a GreenThumb website preview) still has files open. Manual fix:"
+    say "    pkill -f tateru ; pkill -f 'next dev'"
+    say "    sudo rm -rf ${FAILED_ARR[0]}   # repeat for each path above"
+  fi
 else
   echo
   say "User data left intact. A reinstall will pick up where you left off."
@@ -268,5 +317,10 @@ else
 fi
 
 echo
-say "✅ Tateru Pro uninstalled. You can now install a single method cleanly."
+if [ "$PURGE_FAILED" -eq 0 ]; then
+  say "✅ Tateru Pro uninstalled. You can now install a single method cleanly."
+else
+  say "✅ Tateru Pro APP removed (user-data cleanup incomplete — see above)."
+  exit 2
+fi
 exit 0
