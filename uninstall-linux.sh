@@ -17,10 +17,18 @@
 # (npm install, Prisma, venv). This one removes an *installed* Tateru Pro.
 #
 # Usage:
-#   ./uninstall-linux.sh            # remove app (both methods), keep user data
+#   ./uninstall-linux.sh            # interactive — asks keep/wipe/cancel
 #   ./uninstall-linux.sh --purge    # also delete projects/APKs/DB/login
-#   ./uninstall-linux.sh --yes      # don't prompt for confirmation
+#   ./uninstall-linux.sh --yes      # don't prompt for confirmation (keeps data)
+#   ./uninstall-linux.sh --yes --purge   # wipe everything, no prompts
 #   ./uninstall-linux.sh --help
+#
+# One-liner (must use process substitution to preserve interactive stdin):
+#   bash <(curl -fsSL https://tateru.app/uninstall-linux.sh)
+#
+# DON'T pipe via curl | bash — that hands curl's stdout to the script as
+# stdin, breaking the interactive keep/wipe prompt. The script detects this
+# and refuses to guess, printing the correct invocation instead.
 #
 # Best-effort throughout — every fallible step continues on error, like the
 # .deb maintainer scripts. Needs sudo only if a .deb is actually installed.
@@ -104,13 +112,65 @@ if [ "$DEB_INSTALLED" -eq 0 ] && [ "$APPIMAGE_INTEGRATED" -eq 0 ] \
 fi
 
 # ----------------------------------------------------------------------
+# Interactive mode selection (one-liner UX)
+# ----------------------------------------------------------------------
+# Behaviour:
+#   --yes alone           → no prompts, current PURGE value used (0 by default)
+#   --purge alone         → asks proceed-yes/no, mode is wipe
+#   --yes --purge         → no prompts, full purge
+#   neither, TTY stdin    → ask "keep data / wipe data / cancel" THEN final
+#                            proceed prompt (current behaviour preserved)
+#   neither, no TTY       → safe-default: print guidance + abort
+#                            (prevents accidental data loss from "curl | bash"
+#                            invocation which can't accept interactive input)
+#
+# The bash <(curl -fsSL ...) invocation form keeps stdin connected to the
+# terminal so the prompts work. "curl | bash" gives the script curl's
+# stdout as stdin, breaking read — caught by the no-TTY branch below.
+
+if [ "$ASSUME_YES" -eq 0 ] && [ "$PURGE" -eq 0 ]; then
+  if [ -t 0 ]; then
+    echo
+    echo "You're about to uninstall Tateru Pro. Two options for your data:"
+    echo
+    echo "  [1] Keep my data  — remove the app, KEEP projects + APKs + DB + Cloud login"
+    echo "                     (recommended — reinstall later picks up where you left off)"
+    echo "  [2] Wipe my data  — remove app AND all user data listed above"
+    echo "                     (clean-slate; cannot be undone)"
+    echo "  [3] Cancel        — quit without changing anything"
+    echo
+    printf 'Choose [1/2/3] (default: 1): '
+    read -r choice
+    case "${choice:-1}" in
+      1|k|K|keep|KEEP) PURGE=0 ;;
+      2|w|W|wipe|WIPE|purge|PURGE) PURGE=1 ;;
+      3|c|C|cancel|CANCEL|q|Q) echo "Cancelled."; exit 0 ;;
+      *) echo "Unknown choice '$choice' — aborting for safety."; exit 1 ;;
+    esac
+  else
+    # Non-interactive (probably piped via "curl | bash" instead of "bash <(curl ...)").
+    # Refuse to guess about data — print guidance + abort.
+    echo
+    echo "❌ Uninstaller can't ask about your data because stdin isn't a terminal."
+    echo
+    echo "   You probably ran:   curl ... | bash"
+    echo "   Use this instead:   bash <(curl -fsSL https://tateru.app/uninstall-linux.sh)"
+    echo
+    echo "   Or pass flags explicitly:"
+    echo "     curl ... | bash -s -- --yes              # keep data, no prompts"
+    echo "     curl ... | bash -s -- --yes --purge      # wipe data, no prompts"
+    exit 1
+  fi
+fi
+
+# ----------------------------------------------------------------------
 # Confirm
 # ----------------------------------------------------------------------
 echo
 if [ "$PURGE" -eq 1 ]; then
   say "MODE: full removal + PURGE — app AND all user data above will be deleted."
 else
-  say "MODE: app removal only — user data above is PRESERVED (run with --purge to wipe it)."
+  say "MODE: app removal only — user data above is PRESERVED."
 fi
 if [ "$ASSUME_YES" -eq 0 ]; then
   printf '\nProceed? [y/N] '
