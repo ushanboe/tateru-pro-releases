@@ -59,10 +59,14 @@ if ($Version) {
 }
 
 # ── download NSIS installer ──────────────────────────────────────────
-$asset = "Tateru Pro Setup $resolvedVersion.exe"
-$assetEncoded = $asset -replace ' ','%20'
-$downloadUrl = "https://github.com/$repo/releases/download/v$resolvedVersion/$assetEncoded"
-$tmpInstaller = Join-Path $env:TEMP $asset
+# GitHub release upload replaces spaces with dots in asset names —
+# "Tateru Pro Setup X.Y.Z.exe" becomes "Tateru.Pro.Setup.X.Y.Z.exe".
+# Use the dotted form for the URL; keep a friendly display name for
+# the local %TEMP% file so users see the readable filename.
+$asset = "Tateru.Pro.Setup.$resolvedVersion.exe"
+$displayName = "Tateru Pro Setup $resolvedVersion.exe"
+$downloadUrl = "https://github.com/$repo/releases/download/v$resolvedVersion/$asset"
+$tmpInstaller = Join-Path $env:TEMP $displayName
 
 Write-Info "Downloading $asset (~171 MB) to %TEMP%..."
 try {

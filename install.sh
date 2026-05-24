@@ -125,10 +125,15 @@ case "$PLATFORM" in
       # ── AppImage path (portable, no sudo) ─────────────────────────
       DEST_DIR="$HOME/Applications"
       mkdir -p "$DEST_DIR"
-      ASSET="Tateru Pro-${VERSION}.AppImage"
-      URL="https://github.com/${REPO}/releases/download/v${VERSION}/$(urlencode "$ASSET")"
-      DEST_PATH="$DEST_DIR/$ASSET"
-      info "Downloading $ASSET (~208 MB) to $DEST_DIR..."
+      # GitHub release upload replaces spaces with dots in asset names
+      # ("Tateru Pro-..." → "Tateru.Pro-..."). Use the dotted form to match
+      # what's actually on the release. Keep a friendly display name for
+      # the local destination so users see the readable filename.
+      ASSET="Tateru.Pro-${VERSION}.AppImage"
+      DISPLAY_NAME="Tateru Pro-${VERSION}.AppImage"
+      URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ASSET}"
+      DEST_PATH="$DEST_DIR/$DISPLAY_NAME"
+      info "Downloading $DISPLAY_NAME (~208 MB) to $DEST_DIR..."
       curl -fL --progress-bar "$URL" -o "$DEST_PATH"
       chmod +x "$DEST_PATH"
       ok "Installed: $DEST_PATH"
@@ -147,8 +152,9 @@ case "$PLATFORM" in
 
   macos)
     # ── Mac .zip + Gatekeeper bypass ──────────────────────────────────
-    ASSET="Tateru Pro-${VERSION}-mac.zip"
-    URL="https://github.com/${REPO}/releases/download/v${VERSION}/$(urlencode "$ASSET")"
+    # GitHub release upload replaces spaces with dots in asset names.
+    ASSET="Tateru.Pro-${VERSION}-mac.zip"
+    URL="https://github.com/${REPO}/releases/download/v${VERSION}/${ASSET}"
     TMP_ZIP="$(mktemp -t tateru-XXXXXX).zip"
     info "Downloading $ASSET (~199 MB)..."
     curl -fL --progress-bar "$URL" -o "$TMP_ZIP"
