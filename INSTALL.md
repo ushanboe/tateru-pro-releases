@@ -277,10 +277,20 @@ Or via Finder: drag `Tateru Pro` from Applications → Trash.
 
 ### Windows (app-only)
 
+**One-line PowerShell uninstaller** (recommended — interactive keep/wipe prompt, stops lingering processes, mirrors the Linux + Mac scripts):
+
+```powershell
+irm https://tateru.app/uninstall.ps1 | iex
+```
+
+Or manual:
+
 | Install method | Uninstall steps |
 |---|---|
 | **NSIS installer** | **Settings → Apps → Installed apps** → find **Tateru Pro** → **⋯** → **Uninstall**. Or Control Panel → Programs and Features → Tateru Pro → Uninstall. |
 | **Portable .zip** | Delete the extracted folder: `Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Programs\Tateru Pro"` |
+
+**The uninstaller does NOT touch your Flutter SDK, Android Studio + SDK, Java JDK, Git, Node.js, or your Windows Credential Manager (LLM API keys).** Those are developer tools — separate from Tateru — and stay intact. To remove them individually, uninstall each from Settings → Apps; for the Credential Manager entries, open Credential Manager → Windows Credentials → find entries beginning with `Tateru Pro` → Remove.
 
 ---
 

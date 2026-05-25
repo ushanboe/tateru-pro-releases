@@ -49,11 +49,15 @@ bash <(curl -fsSL https://tateru.app/uninstall-linux.sh)
 bash <(curl -fsSL https://tateru.app/uninstall-macos.sh)
 ```
 
-### Windows
+### Windows (PowerShell)
 
-Open **Settings → Apps → Installed apps** → find **Tateru Pro** → click **⋯** → **Uninstall**.
+```powershell
+irm https://tateru.app/uninstall.ps1 | iex
+```
 
-Each uninstaller asks whether to keep your data (projects, built APKs, login) or wipe everything. Default is **keep** — a future reinstall picks up where you left off.
+Or use the standard Windows path: **Settings → Apps → Installed apps** → find **Tateru Pro** → **⋯** → **Uninstall** (this is the same NSIS uninstaller the one-liner runs, just without the interactive keep/wipe prompt — it preserves your data by default).
+
+Each uninstaller asks whether to keep your data (projects, built APKs, login) or wipe everything. Default is **keep** — a future reinstall picks up where you left off. **None of the uninstallers touch your Flutter SDK, Android Studio, Java, Git, or Node.js** — those are developer tools, separate from Tateru, and stay intact.
 
 ---
 
