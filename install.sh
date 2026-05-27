@@ -160,6 +160,23 @@ case "$PLATFORM" in
     curl -fL --progress-bar "$URL" -o "$TMP_ZIP"
     ok "Downloaded to $TMP_ZIP"
     APP_PATH="/Applications/Tateru Pro.app"
+    # Mod 10.219 (9.34.9): pkill any running Tateru process BEFORE replacing the
+    # bundle. macOS doesn't auto-kill running processes whose .app was replaced;
+    # `open -a "Tateru Pro"` then brings the OLD process to the foreground
+    # instead of starting a fresh one from the just-replaced bundle, showing the
+    # OLD version's UI. Patrick hit this 2026-05-27 — installed 9.34.8 three
+    # times, kept seeing 9.32.11 in the sidebar because the previous instance
+    # was still loaded. Force-quit clears the slate so the new bundle actually
+    # launches. Best-effort: not failing on pkill exit code (returns nonzero
+    # when no matching process exists, which is normal on first install).
+    if pgrep -fl "Tateru Pro.app/Contents/MacOS/Tateru Pro" >/dev/null 2>&1; then
+      info "Found running Tateru Pro process — force-quitting before replace..."
+      pkill -f "Tateru Pro.app/Contents/MacOS/Tateru Pro" 2>/dev/null || true
+      sleep 1
+      # Hard-kill any stragglers (Trendcast sidecar, in-process API)
+      pkill -9 -f "Tateru Pro.app/Contents/MacOS/Tateru Pro" 2>/dev/null || true
+      sleep 1
+    fi
     if [[ -d "$APP_PATH" ]]; then
       info "Existing install found at $APP_PATH — replacing..."
       rm -rf "$APP_PATH"
