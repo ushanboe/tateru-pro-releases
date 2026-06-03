@@ -189,10 +189,28 @@ case "$PLATFORM" in
     info "  see MACOS_INSTALL.md for details. Code signing planned post-beta."
     xattr -dr com.apple.quarantine "$APP_PATH" 2>/dev/null || \
       info "  xattr returned non-zero — first launch will prompt; right-click → Open to bypass."
+    # Mod 10.265 (2026-06-04): re-register the freshly-installed app with
+    # LaunchServices so subsequent `open -a "Tateru Pro"` calls (Dock,
+    # Spotlight, Alfred) resolve to THIS path, not a stale cached path from
+    # an older copy that might still exist on disk (~/Downloads, an old
+    # backup folder, Trash, etc).
+    #
+    # Real-world surfacing: Patrick 2026-06-04 — uninstalled, ran install
+    # script for v9.34.14, launched, sidebar still showed v9.32.11. mod 10.219
+    # (9.34.9) caught the running-process case but not the stale-LaunchServices
+    # case. This fixes that hole.
+    LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+    if [[ -x "$LSREGISTER" ]]; then
+      "$LSREGISTER" -f "$APP_PATH" 2>/dev/null || true
+    fi
     ok "Installed: $APP_PATH"
     if [[ "$NO_LAUNCH" == "0" ]]; then
       info "Launching..."
-      open -a "Tateru Pro" || info "(launch failed — open manually from /Applications)"
+      # Mod 10.265 (2026-06-04): launch by EXPLICIT path, NOT by name.
+      # `open -a "Tateru Pro"` resolves via LaunchServices' name index,
+      # which may point at a stale .app elsewhere on disk. Always use the
+      # absolute path so we definitively launch the freshly-installed app.
+      open "$APP_PATH" || info "(launch failed — open manually from /Applications)"
     fi
     ;;
 esac
