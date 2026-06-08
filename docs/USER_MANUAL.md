@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.32.13
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-11
+**Last updated:** 2026-06-08
 ---
 
 # Tateru Pro — User Manual
@@ -194,19 +194,23 @@ Tateru's sidebar is grouped into 6 sections. Each item links to a screen.
 | **Dashboard** | Home page — recent activity, project counts, system health, quick links to common actions. |
 | **My Apps** | List of every project you've built or imported. Sortable, searchable, click any row to open its Pipeline page. |
 
-#### Above the top group — version + Cloud Sauce indicator
+#### Above the top group — version + the Cloud Build Learnings "sauce line"
 
 The sidebar header shows **`v1.0.0-beta.X.Y.Z`** under the **tateru PRO** logo — that's the version of Tateru you're running (auto-updates when you upgrade).
 
-Directly below the version you may see a small **LED-style "Cloud sauce" pill** (a coloured dot + short text). This is the Cloud Rules indicator — it tells you whether the **latest** authoritative build rules are pulled from Tateru's cloud vault, or whether you're running the bundled rules that shipped with this Tateru version.
+Directly below the version is the **Cloud Build Learnings "sauce line"** (a coloured dot + short text). This tells you whether Bob is building with the **latest** validated build-rules pulled live from Tateru's cloud vault, or with the bundled rules that shipped inside this Tateru version.
 
-**Default: the pill is hidden** — Tateru uses the bundled rules baked into the binary. To opt into pulling cloud rules between releases, set `CLOUD_RULES=1` in your user data .env (see [Settings → Cloud Sauce indicator](SETTINGS_REFERENCE.md#cloud-sauce-indicator) for the full state table and dogfood instructions).
+**Default: Cloud Build Learnings is ON.** Every install pulls the latest validated build-rules from the cloud into Bob's knowledge (not just the rules baked into the binary), so Bob avoids known failure patterns that were discovered after this release shipped. The sauce line + a **white LED** on Bob's pipeline tile show when cloud rules are live (see [The Build Pipeline](#the-build-pipeline--how-an-app-gets-made) for the LED).
 
-Pill states (when visible):
-- 🟡 **not downloaded** + Pull button → click to fetch
-- 🟢 **vN · latest** → cloud confirms you have the latest validated rules
-- 🟠 **vN · update available** + Pull button → a newer rule version exists
-- 🔵 **vN · offline** → cache present but cloud version-check unreachable (cache still works)
+**Fail-open by design.** If you're offline or not signed in, the build runs on the bundled rules exactly like before — nothing blocks, no first-build is ever gated. Opt out entirely by setting `CLOUD_RULES=false` in your user data `.env`.
+
+Sauce-line states:
+- ⚪ **Bundled rules · cloud off** → you've opted out (or are pre-fetch); Bob runs on the rules baked into the binary
+- 🟢 **Cloud sauce vN · latest** → cloud confirms you have the latest validated rules
+- 🟠 **Cloud sauce vN · update available** + Pull button → a newer rule version exists
+- 🔵 **Cloud sauce vN · offline** → cache present but cloud version-check unreachable (cache still works)
+
+For the full state table see [Settings → Cloud Build Learnings](SETTINGS_REFERENCE.md).
 
 ### Build Modes
 
@@ -248,7 +252,7 @@ Tools that run on a finished app (not used during the build itself):
 
 ### Settings (gear icon, bottom of sidebar)
 
-Account, AI Providers, Build Model Config, Audit Model, SDK Paths, Telegram Notifications, Build Learnings, System Info, Diagnostics, About. See [Settings — every panel explained](#settings--every-panel-explained) below.
+Account, AI Providers (incl. Z.AI), Build Model Config, GreenThumb Website Model, Refinement Agent Model, Audit Model, Apple Developer Team ID, Auto-Refine, SDK Paths, Telegram Notifications, Build Learnings, Power user mode, Privacy & Reset, System Info, Diagnostics, About. See [Settings — every panel explained](#settings--every-panel-explained) below.
 
 ### Admin (only visible if `TATERU_ADMIN=1` was set at build time)
 
@@ -328,6 +332,23 @@ It does NOT remove:
 Each mode opens the same New Project page, just with a different starting form. All modes feed the same pipeline downstream.
 
 For a deeper walkthrough of each mode with screenshots and worked examples, see [BUILD_MODES_GUIDE.md](BUILD_MODES_GUIDE.md).
+
+### Look & Feel — choosing your app's design (optional step in New Project)
+
+When you create a project, the New Project flow includes a **"Design" step** with a unified **Look & Feel picker**. This is where you choose how your built app looks — vibe, colour scheme, and font — and the chosen theme is built straight into a good-looking *functional* app.
+
+You pick along three axes:
+
+1. **Vibe** (10 options) — the overall design direction (e.g. Modern Minimal). Picking a vibe pre-selects a cohesive default colour scheme + font you can then override.
+2. **Colour scheme** (10 options) — a seed colour that derives a full palette (light + dark are generated automatically).
+3. **Font** (10 options) — a Google font for the app's typography.
+
+That's **10 × 10 × 10** = 1,000 combinations. A **live preview** updates as you change any axis so you can see the look before you build.
+
+- **Recommended** — the picker highlights a sensible default combination to start from.
+- **Skip** — don't want to pick a theme? Click **Skip** for a plain build. The app is still built; it just uses a neutral default styling instead of a chosen theme.
+
+The Look & Feel picker is the single place to choose your app's design — it replaces the old standalone "Themed Build" entry, the separate post-spec theme-picker step, and the external tateru-ux tool (all removed).
 
 ### Discover (AppScout)
 
@@ -492,6 +513,13 @@ Every Tateru app goes through 9 named agents in sequence. The Pipeline page show
 | 10 | Feature Auditor | Audit | Verifies every feature in the spec is actually wired in the generated code | 1–5 min | $0.10–$5 |
 
 Then **APK build** runs automatically (~3–8 min, costs nothing — runs locally). Total end-to-end: **15–90 min** for typical apps; complex multi-screen apps with AI features may take longer.
+
+### Pipeline tile status LEDs
+
+Each agent tile can show two small status LEDs:
+
+- **Purple cache LED** (top-right) — lights when that agent is getting Anthropic **prompt-cache hits**. Bob's agentic loop re-sends the same large system prompt every round; with caching those repeat reads bill at ~10% of the input rate, so a lit purple LED is a real-time sign your build is cheaper than the uncached estimate. (Bob's purple LED typically lights by round 2 and stays lit through BUILD.)
+- **White cloud LED** (top-left) — lights when that agent's prompt actually **included cloud-delivered Build Learnings rules** (the latest validated rules pulled from Tateru's cloud vault, on top of the rules baked into the binary). Only Bob can light it. A dark white LED across a build means the cloud rules aren't being delivered (e.g. you're offline, signed out, or opted out) and Bob ran on the bundled rules instead. See the [Cloud Build Learnings sauce line](#above-the-top-group--version--the-cloud-build-learnings-sauce-line).
 
 ### Spec Approval Panel (gate before Bob runs)
 
@@ -670,7 +698,15 @@ The Refine instruction has a small **Copy to clipboard** button that flashes "Co
 
 ## Send to Phone — Android, iOS, macOS deploy
 
-After your APK builds, you have multiple ways to install it.
+After your APK builds, you have multiple ways to install it. The Pipeline page presents deploy targets as **separate cards**, each with its own large header:
+
+- **Android card** — renders on every platform (Linux + Mac + Windows). Has an **Emulator** subsection (boot an Android emulator and install to it) and a **Device** subsection (install to a real phone, including Rebuild APK + Install on Phone).
+- **iOS card** — Mac-only. iOS Simulator + real iPhone install.
+- **macOS card** — Mac-only. Build a macOS `.app`.
+
+The **Refine** card is now refinement-only — the Rebuild APK + Install on Phone buttons live in the Android card's Device subsection, not in Refine.
+
+> **Tip — the pipeline tiles' LEDs.** Each agent tile can show two small status LEDs: a **purple cache LED** (top-right) lights when that agent is getting Anthropic prompt-cache hits (cheaper builds), and a **white cloud LED** (top-left) lights when the agent's prompt actually included cloud-delivered Build Learnings rules. See [The Build Pipeline](#the-build-pipeline--how-an-app-gets-made).
 
 ### Android — Install on Android button
 
@@ -713,6 +749,25 @@ If the pair fails, common causes:
    - **Pipeline page** → click **Install on Android** → pick your USB device → install, OR
    - **Code Workbench → Deploy tab** → switch to **USB Cable** mode → click **Install via USB**
 
+### Android — Emulator (AVD)
+
+The Android card's **Emulator** subsection lets you boot an Android emulator and install your built APK to it from inside Tateru — on Linux, Mac, and Windows. Use this when you don't have a real Android phone handy.
+
+**What you need:** Android Studio's emulator + at least one AVD (Android Virtual Device) created. (In Android Studio: **View → Tool Windows → Device Manager** → create a virtual device.)
+
+How it works:
+
+1. **Pick an AVD** from the dropdown (Tateru lists the AVDs it found).
+2. Click **Boot** — a 4-stage progress runs: *Starting emulator… → Waiting for ADB connection… → Waiting for boot completion… → Ready.* Cold boot takes 30–90 seconds.
+3. Once the emulator is ready, click **Install** — Tateru installs your APK and **auto-launches the app**.
+
+**Pre-flight checks** run before install so you don't hit cryptic errors:
+
+- **Hardware acceleration check** — confirms KVM (Linux) / Hypervisor.framework (Mac) / Hyper-V or HAXM (Windows) is available. If acceleration is missing the emulator runs at single-digit FPS; Tateru surfaces an OS-specific fix hint.
+- **API-level compatibility check** — compares your APK's `minSdkVersion` against the AVD's API level and warns *before* install (e.g. "AVD is API 30 but APK requires minSdkVersion 33") instead of letting `adb install` fail with `INSTALL_FAILED_OLDER_SDK`.
+
+If something fails, a **Diagnose** button appears (same flow as the APK Diagnose — Claude matches the error against Tateru's MISTAKES rules; emulator failures are environmental, not Dart-code bugs).
+
 ### Where the deploy UI lives — quick map
 
 A common question: "I see Wireless ADB / USB references in the docs but where do I actually find the buttons?"
@@ -720,16 +775,17 @@ A common question: "I see Wireless ADB / USB references in the docs but where do
 | Action | Where |
 |---|---|
 | Pair an Android phone wirelessly (one-time setup) | **Code Workbench → Deploy tab → Wireless mode** |
-| Install via USB cable | **Code Workbench → Deploy tab → USB Cable mode**, OR Pipeline page → Install on Android |
-| Install on a paired/connected device after each build | **Pipeline page → RefinementPanel → Install on Android button** |
-| iOS Simulator + iPhone install (Mac only) | **Pipeline page → MultiTargetDeploy panel** |
-| Build for macOS .app (Mac only, experimental) | **Pipeline page → MultiTargetDeploy panel** |
+| Install via USB cable | **Code Workbench → Deploy tab → USB Cable mode**, OR Pipeline page → Android card → Install on Android |
+| Install on a paired/connected device after each build | **Pipeline page → Android card → Device subsection → Install on Android button** |
+| Boot an Android emulator + install to it | **Pipeline page → Android card → Emulator subsection** |
+| iOS Simulator + iPhone install (Mac only) | **Pipeline page → iOS card** |
+| Build for macOS .app (Mac only) | **Pipeline page → macOS card** |
 
 Wireless ADB pairing is in the Workbench because it's a per-project workspace tool. After you've paired once, the device persists across all your projects until Wireless Debugging is toggled off on the phone — so subsequent installs use the lighter Pipeline page button.
 
 ### iOS Simulator (Mac only)
 
-The Pipeline page → **iOS & macOS targets** section appears on macOS hosts.
+The Pipeline page → **iOS card** appears on macOS hosts.
 
 1. Open the Simulator app first (if not running)
 2. In Tateru: **iOS Device** dropdown shows booted simulators + connected real iPhones
@@ -740,7 +796,9 @@ The Pipeline page → **iOS & macOS targets** section appears on macOS hosts.
 
 ### iOS — Real iPhone (Mac only, requires Apple Developer account)
 
-One-time setup per project:
+**iOS auto-signing.** On your first iOS build, Tateru auto-detects your Apple Developer Team ID from the macOS keychain and signs the build for you — so for most users you can skip the Xcode "Signing & Capabilities" dance entirely. If you have **multiple teams**, set the one to use explicitly in **Settings → Apple Developer Team ID** (see [Settings](#settings--every-panel-explained)).
+
+If auto-signing can't find a single team (or you'd rather set it by hand), the manual one-time setup per project is:
 
 1. After the project's iOS scaffold exists (first iOS build creates it), open the project in Xcode:
    ```bash
@@ -769,9 +827,9 @@ Next to the iOS Device dropdown, a small 🩺 stethoscope button opens the **iOS
 
 Use this when your iPhone is plugged in but doesn't appear in the dropdown.
 
-### macOS .app build (Mac only, experimental)
+### macOS .app build (Mac only)
 
-Pipeline page → **iOS & macOS targets** → **Build for macOS [exp]** button.
+Pipeline page → **macOS card** → **Build for macOS** button.
 
 - Runs `flutter build macos --release` against your project's existing source (Bob's Android-spec output is mostly cross-platform)
 - Output: `~/.tateru-pro/data/output_apps/<slug>/<slug>-mac.app.zip`
@@ -788,7 +846,9 @@ Both iOS and macOS builds have their own Diagnose buttons in the BuildConsole wh
 
 ## Trend Cast — predicting your app's launch performance
 
-Sidebar → **Trend Cast** → opens the Validate page.
+> **Disabled by default.** Trend Cast (the Decide / Predict launch-prediction feature) is **off by default** in current builds — its Python prediction sidecar no longer spawns (it was unrelated to building apps and caused a Windows `cmd.exe` startup popup), and the Decide/Predict UI is hidden. **Re-enable it** by setting `TRENDCAST_ENABLED=true` in your user data `.env`. Everything below describes how Trend Cast works once it's turned on. For the full guide — which leads with how to re-enable it — see [TRENDCAST_GUIDE.md](TRENDCAST_GUIDE.md).
+
+Once enabled: Sidebar → **Trend Cast** → opens the Validate page.
 
 ### What it does
 
@@ -851,6 +911,8 @@ GreenThumb has two distinct purposes:
 2. **Marketing site generator** — builds a Next.js site you can deploy to Vercel
 
 Both flows share the same Audit Job — you start by feeding GreenThumb a project, then both audit + website actions run against that job.
+
+> **GreenThumb works on Mac + Windows (and Linux).** Because the marketing-site generator runs `npm install` and a Next.js preview server, GreenThumb requires **Node.js LTS (18+)** installed on your machine. (Node is *not* needed to build apps — only for GreenThumb's website + docs generation.) If Node is missing, the website preview won't start.
 
 ### Starting an audit
 
@@ -929,6 +991,8 @@ Pre-flight modal — the **Content Review Modal**:
 
 5. **Approve & Generate** — click to start.
 
+**Website Model.** Which model GreenThumb uses to *generate* the site itself (the hero / features / TSX) is set in **Settings → GreenThumb Website Model** (defaults to **Sonnet 4.6**; see [Settings](#settings--every-panel-explained)). This is separate from the Chatbot Model above (which only powers the deployed site's chat widget).
+
 Pipeline (~3–8 min):
 
 - Copy the marketing-web template to `~/.tateru-pro/websites/<AppName>-web/`
@@ -952,7 +1016,7 @@ For full GreenThumb walkthrough including deploying to Vercel, see [GREENTHUMB_G
 
 ## Save Locally / Push to GitHub / Export Project
 
-After your project is READY, you have several ways to get the source out of `~/.tateru-pro/data/projects/`.
+After your project is READY, you have several ways to get the source out of `~/.tateru-pro/data/projects/`. On the Pipeline page these live under the **Save and Build Website** section (Save to Local Repo + Push to GitHub + Send to GreenThumb) — formerly labelled "Save & Deploy".
 
 ### Save Locally
 
@@ -1049,7 +1113,7 @@ For every-field detail, see [SETTINGS_REFERENCE.md](SETTINGS_REFERENCE.md). Belo
 
 ### AI Providers
 
-For each of 6 providers (Anthropic, OpenAI, Google, Moonshot, DeepSeek, Ollama Cloud):
+For each provider (Anthropic, OpenAI, Google, Moonshot, DeepSeek, Ollama Cloud, **Z.AI**):
 
 - **Status indicator** — ✅ Configured (key set + last test passed) / ❌ Not configured / ⚠️ Test failed
 - **API Key** field (paste key — masked after save)
@@ -1057,21 +1121,42 @@ For each of 6 providers (Anthropic, OpenAI, Google, Moonshot, DeepSeek, Ollama C
 - **Test Connection** button — calls the provider's "list models" endpoint to verify
 - **Delete** button — removes the saved key (replaces with empty string in .env)
 
-Anthropic + OpenAI are required for the default Balanced preset. Others are only needed if you switch presets or pick non-default models per agent.
+Anthropic + OpenAI are required for the default Bob: Anthropic Sonnet preset. Others are only needed if you switch presets or pick non-default models per agent.
+
+**Z.AI (GLM-4.6) — a cheaper Bob.** The **Z.AI** provider card unlocks the GLM-4.6 model, a much cheaper alternative for Bob (~$1.90/build vs ~$2.50 on Sonnet). Set `Z_AI_API_KEY` (paste the key into the Z.AI card and Save), then pick the **"Bob: Z.ai GLM-4.6"** preset in Build Model Config to use it.
 
 ### Build Model Config
 
-The **per-agent model selection** for the build pipeline. Two modes:
+The **per-agent model selection** for the build pipeline. Presets are named after **Bob's model** — Bob is ~70% of build cost, so the preset name tells you straight away which model the builder runs on (and the card's advice text lists each agent's model so you can see the safety-net agents before you pick).
 
-**Preset mode** (default) — pick one of 5 presets:
+The picker has **TWO preset rows**:
 
-- **Budget** — Haiku across the board. Cheapest, fastest, lower quality on complex apps. Good for prototyping.
-- **Balanced** (recommended) — Sonnet on the load-bearing agents (Bob, Doc-Tor, Build Architect, Agent Orange, Feature Auditor), Haiku on lighter ones (Distiller, Thinker Bell, DocSmith, Test Generator). DALL-E for icons.
-- **Premium** — Opus across the board. Highest quality, highest cost. For mission-critical builds.
-- **DeepSeek Hybrid** — DeepSeek-Chat on analysis agents, Sonnet on code-gen. Cost-saver while keeping code quality.
-- **Hybrid Cloud + qwen3** — Ollama Cloud's qwen3 on analysis, Sonnet on code-gen. Requires Ollama Cloud subscription.
+- **Brief pipeline** — for the standard build pipeline:
+  - **Bob: Z.ai GLM-4.6** — the cheapest Bob (~$1.90/build). Requires `Z_AI_API_KEY`.
+  - **Bob: Anthropic Sonnet** (recommended default) — Sonnet on the load-bearing agents.
+  - **Bob: Anthropic Sonnet Pro** — Sonnet across all agents.
+  - **Bob: Anthropic Opus** — Opus on the critical agents. Highest quality, highest cost.
+- **Design pipeline** — the matching set of presets framed around Design Bob's model (used when you build through the Look & Feel / design path).
 
-**Custom mode** — pick a model individually for each agent. Toggle via the "Customize per agent" link below the preset cards. The customizer shows a row per agent: Distill / Architect / Docs / Build / Icons / Post Docs / Review / Test / Audit. For each, a dropdown of all available models from your configured providers. Whatever you set is used for that agent on every future build.
+> Whatever preset you pick, **ThinkerBell and Build Architect are pinned to Sonnet on the cheap presets** — they emit large structured JSON that smaller models truncate mid-output. Doc-Tor and the **Refinement Agent** are likewise pinned to Sonnet so cheap presets stay reliable.
+
+**Custom mode** — pick a model individually for each agent. Toggle via the "Customize per agent" link below the preset cards. The customizer shows a row per agent: Distill / Architect / Docs / Build / Icons / Post Docs / Review / Test / Audit (plus the design-pipeline agents). For each, a dropdown of all available models from your configured providers. Whatever you set is used for that agent on every future build.
+
+### GreenThumb Website Model
+
+Single picker — the model GreenThumb uses to **generate the marketing site** (hero / features / TSX). 5 curated cards, defaulting to **Sonnet 4.6** (Recommended). Separate from the per-site Chatbot Model you choose in the Content Review Modal, and from the Audit Model below.
+
+### Refinement Agent Model
+
+Single picker — the model the **Refine** agent uses. Curated dropdown defaulting to **Sonnet 4.6**. (Setting this here is equivalent to the per-preset Refinement slot — it ensures Refine never silently falls back to a default model.)
+
+### Apple Developer Team ID (Mac)
+
+For iOS builds, Tateru auto-detects your Apple Developer Team ID from the macOS keychain on the first iOS build (so you can skip the Xcode "Signing & Capabilities" dance). If you have **multiple teams**, set the one to use explicitly here. Leave it blank to let auto-detection pick the single team.
+
+### Auto-Refine build failures (experimental)
+
+A toggle (default **OFF**) that, when on, automatically runs **Diagnose → Refine → Re-build** when a build fails — up to a cycle count + cost ceiling you set — then surfaces a report if it can't recover. You can **Cancel** the loop at any time. When on, you also set the **max cycles** and **cost ceiling** for the autonomous loop.
 
 ### Audit Model
 
@@ -1125,6 +1210,15 @@ Manage the local-only learnings collected from your Diagnose+fix cycles.
 - **Per-rule Delete** button — remove a rule from your local DB
 
 For Pro Annual users, the share toggle is hidden (Private Build Mode = no telemetry). A "Manual pull" button lets Pro users still receive validated rules from cloud on demand.
+
+### Power user mode
+
+A toggle that enables advanced controls. With it on, the Pipeline page shows a **"Restart from phase…"** option so you can re-run a build starting from any pipeline phase instead of from the beginning.
+
+### Privacy & Reset
+
+- **Project import / export** — move projects between Tateru installs as `.tateru-project` archives (see [Save Locally / Push to GitHub / Export Project](#save-locally--push-to-github--export-project)).
+- **Reset all** — wipes your saved API keys + local database so you can start clean, **while keeping your projects and built APKs** on disk. Use this if you want a fresh-start configuration without losing your work.
 
 ### System Info
 
@@ -1300,4 +1394,4 @@ In rough order of speed-to-answer:
 
 ---
 
-*This manual is a living document. Last updated for Tateru Pro v1.0.0-beta.9.32.13 on 2026-05-11. The latest version always lives at the [public release repo's docs/USER_MANUAL.md](https://github.com/ushanboe/tateru-pro-releases/blob/main/docs/USER_MANUAL.md).*
+*This manual is a living document. Last updated for Tateru Pro v1.0.0-beta.9.34.15 on 2026-06-08. The latest version always lives at the [public release repo's docs/USER_MANUAL.md](https://github.com/ushanboe/tateru-pro-releases/blob/main/docs/USER_MANUAL.md).*

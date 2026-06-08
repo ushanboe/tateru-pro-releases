@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.32.13
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-11
+**Last updated:** 2026-06-08
 ---
 
 # Build Modes — deep dive
@@ -459,6 +459,31 @@ For those, **Manual Entry** + a thoughtful spec is faster than Clone + manual cl
 > Don't like v3 → import v1.tateru-project → "Replace existing project" → back to v1
 
 The export format is your safety net for "I want to try a major refactor without losing the working baseline".
+
+---
+
+## The "Look & Feel" picker (every mode)
+
+Whichever mode you start in, the New Project flow includes a unified **"Look & Feel"** design step. It lets you give your app a cohesive visual identity before it's built — and the chosen theme is built straight into a good-looking, *functional* app. (This single picker replaces the old standalone "Themed Build" sidebar entry and the separate theme-picker step, and supersedes the external tateru-ux tool.)
+
+### How it works
+
+The picker has three axes, chosen in order, each with 10 options:
+
+1. **Vibe** (10 options) — the overall feel (e.g. Modern Minimal, Warm Organic, Cool Professional, Soft Pastel, …). Picking a vibe **pre-selects a cohesive default colour scheme + font** that suits it.
+2. **Colour scheme** (10 options) — the palette. Each scheme produces matching light + dark themes automatically. Pre-filled from your vibe; override freely.
+3. **Font** (10 options) — the typeface (Google Fonts). Also pre-filled from your vibe; override freely.
+
+That's **10 × 10 × 10 = 1,000** combinations. A **live preview** updates as you change any axis, so you can see the result before building.
+
+### Recommended and Skip
+
+- **Recommended** — one tap applies a cohesive, sensible default (vibe + colour + font) if you'd rather not fiddle.
+- **Skip** — skips theming entirely and produces a **plain build** (no opinionated palette/font applied). You can always theme later.
+
+### What you get
+
+The chosen theme isn't a cosmetic afterthought — it's compiled into the app: a real Material 3 colour scheme (light + dark), the selected font, and a style direction passed to the builder so the generated app looks intentional and consistent across every screen, while remaining fully functional.
 
 ---
 

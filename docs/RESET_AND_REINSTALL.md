@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** v1.0.0-beta.9.33.1
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-19
+**Last updated:** 2026-06-08
 ---
 
 # Reset and Reinstall — Complete Fresh-Install Guide
@@ -44,6 +44,12 @@ refuses to launch the pipeline if any are missing.
 > + Settings → SDK Paths can detect, persist, and self-heal stale paths.
 > Read [Troubleshooting](TROUBLESHOOTING.md) first — the common issues
 > have one-line fixes that don't require a full wipe.
+
+> 💡 **Lighter alternative — in-app reset.** Before reinstalling, try
+> **Settings → Privacy & Reset**. It wipes your saved API keys + the local
+> database so you start clean, while **keeping your projects and built
+> APKs**. This clears stale credentials / corrupted DB state without
+> touching the SDKs or reinstalling Tateru — often all you need.
 
 ---
 

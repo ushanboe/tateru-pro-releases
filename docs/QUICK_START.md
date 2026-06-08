@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.32.13
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-11
+**Last updated:** 2026-06-08
 ---
 
 # Quick Start
@@ -106,9 +106,20 @@ The Spec Chat agent will either:
 - **Emit a JSON spec immediately** (if your description was concrete enough) — click "Use this spec"
 - **Ask 2-4 clarifying questions** — answer them, then it produces the spec
 
-You're taken to the **New Project page** with the spec pre-filled. Review it (you can edit features, owner email, etc.), then click **Create Project**.
+You're taken to the **New Project page** with the spec pre-filled. Review it (you can edit features, owner email, etc.).
 
-You land on the **Pipeline page**. Click **Start Pipeline**.
+### Give it a look & feel (or Skip)
+
+Before you build, the New Project flow includes a **"Look & Feel"** design step. Pick a **vibe → colour scheme → font** (10 options on each axis, with a live preview). Choosing a vibe pre-selects a cohesive default colour + font that you can override. Each scheme generates matching light + dark themes automatically.
+
+- Tap **Recommended** for a sensible cohesive default in one click.
+- Tap **Skip** for a plain build (no theme applied) — you can theme later.
+
+The chosen theme is built straight into a good-looking, *functional* app.
+
+Then click **Create Project**. You land on the **Pipeline page** — click **Start Pipeline**.
+
+> **Cloud Build Learnings is on by default.** Every install pulls the latest validated build-rules from the cloud into Bob's knowledge, so your app gets smarter over time. Nothing to configure. If you're offline or not signed in, builds just run on the bundled rules instead — nothing blocks.
 
 ### What happens next
 
@@ -168,17 +179,15 @@ The app appears on your phone's home screen. Open it. You're done.
 Now that you've built your first app, explore:
 
 - **Refinement Agent** — Pipeline page → Refine App. Type "Add a dark mode toggle" or any other change → 5-15 min later your APK has the change
-- **Different Build Modes** — try Manual Entry for a hand-crafted spec, or Discover to find a Play Store opportunity to clone
-- **Trend Cast** — sidebar → predict your app's launch performance before shipping
+- **Different Build Modes** — try Manual Entry for a hand-crafted spec, JSON Upload for a complete spec, Clone App from screenshots, or Discover to find a Play Store opportunity. (Import Project lets you continue a project exported from another machine.)
 - **Website & Docs** — sidebar → generate a Next.js marketing website you can deploy to Vercel
 - **Push to GitHub** — Pipeline page → push the project source to a new GitHub repo
 
 For deeper detail on every Tateru feature, see:
 
 - [USER_MANUAL.md](USER_MANUAL.md) — comprehensive reference for every UI element
-- [BUILD_MODES_GUIDE.md](BUILD_MODES_GUIDE.md) — deep dive on each of the 6 build modes
+- [BUILD_MODES_GUIDE.md](BUILD_MODES_GUIDE.md) — deep dive on each of the 6 build modes + the Look & Feel picker
 - [GREENTHUMB_GUIDE.md](GREENTHUMB_GUIDE.md) — audit + website + docs flows
-- [TRENDCAST_GUIDE.md](TRENDCAST_GUIDE.md) — launch prediction
 - [SETTINGS_REFERENCE.md](SETTINGS_REFERENCE.md) — every setting field documented
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — common issues + fixes
 - [FAQ.md](FAQ.md) — frequently asked questions

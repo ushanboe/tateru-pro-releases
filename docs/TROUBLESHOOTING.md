@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.32.13
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-11
+**Last updated:** 2026-06-08
 ---
 
 # Troubleshooting
@@ -17,14 +17,15 @@ User-friendly recipes for the most common things that go wrong, organized by sym
 3. [Build pipeline issues](#build-pipeline-issues)
 4. [APK build (Gradle) issues](#apk-build-gradle-issues)
 5. [Send to Phone (Android)](#send-to-phone-android)
-6. [iOS issues (Mac)](#ios-issues-mac)
-7. [GreenThumb (audit + website)](#greenthumb-audit--website)
-8. [Cloud Sauce indicator (sidebar pill)](#cloud-sauce-indicator-sidebar-pill)
-9. [Send Feedback / Ask Bob](#send-feedback--ask-bob)
-10. [Login / billing / subscription](#login--billing--subscription)
-11. [Performance + disk space](#performance--disk-space)
-12. [Specific error messages — alphabetical lookup](#specific-error-messages--alphabetical-lookup)
-13. [Still stuck?](#still-stuck)
+6. [Android Emulator (AVD) issues](#android-emulator-avd-issues)
+7. [iOS issues (Mac)](#ios-issues-mac)
+8. [GreenThumb (audit + website)](#greenthumb-audit--website)
+9. [Cloud Sauce indicator (sidebar pill)](#cloud-sauce-indicator-sidebar-pill)
+10. [Send Feedback / Ask Bob](#send-feedback--ask-bob)
+11. [Login / billing / subscription](#login--billing--subscription)
+12. [Performance + disk space](#performance--disk-space)
+13. [Specific error messages — alphabetical lookup](#specific-error-messages--alphabetical-lookup)
+14. [Still stuck?](#still-stuck)
 
 ---
 
@@ -159,15 +160,14 @@ Agent Orange runs up to 7 review cycles. Most builds clear in 1-3. Music apps + 
 2. Click **Refine** with a custom instruction — sometimes one targeted hint is faster than 7 cycles of incremental fixes
 3. Try **Restart Pipeline** after switching Agent Orange to Opus (more nuanced fixes per cycle)
 
-### "No Apple Developer Team is set" — but I set it in Xcode
+### "No Apple Developer Team is set"
 
-Pre-9.32.x bug — `flutter create --platforms=ios` was wiping the Team setting on every iOS build. **Mod 10.75 (9.32.x+) preserves it.** Upgrade.
+Signing is now **auto-detected**. On your first iOS build Tateru reads your Apple Developer Team ID from the macOS keychain, so the old Xcode "Signing & Capabilities" dance is no longer needed. You'll only see this error in two cases:
 
-If you're on 9.32.x+ and still seeing this:
+1. **You belong to more than one Apple Developer team.** Tateru can't guess which one — set it explicitly in **Settings → Apple Developer Team ID**, then retry the build.
+2. **No team is in your keychain at all.** Open Xcode → Settings → Accounts → add your Apple ID (the one with the developer membership), then retry. The error message also includes a **Copy command** button with the `open "<workspace>"` command if you'd rather configure it in Xcode directly.
 
-1. The error message includes the absolute path to `project.pbxproj` — open that file in a text editor
-2. Search for `DEVELOPMENT_TEAM` — there should be 2-3 entries (one per build configuration) all set to your team ID
-3. If they're empty: open `Runner.xcworkspace` in Xcode → Runner target → Signing & Capabilities → re-set the team → save
+If you set the Team in Xcode and it gets wiped on rebuild, you're on a pre-9.32 build — the scaffold regen used to clear it (fixed in mod 10.75). Upgrade to the latest version.
 
 ---
 
@@ -274,6 +274,48 @@ If still failing on 9.32.13+:
 
 ---
 
+## Android Emulator (AVD) issues
+
+The Android deploy card has an **Emulator** subsection (renders on Linux, Mac, and Windows): pick an AVD → **Boot** (4-stage progress) → **Install** (auto-launches the app). It requires Android Studio's emulator plus at least one AVD created.
+
+### "No AVD found" / the AVD dropdown is empty
+
+Tateru can boot AVDs but it can't create them — you need at least one AVD from Android Studio.
+
+**Fix:**
+
+1. Open Android Studio → **More Actions** (or **Tools**) → **Virtual Device Manager**.
+2. **Create Device** → pick a phone (e.g. Pixel 7) → pick a system image (download one if prompted) → Finish.
+3. Back in Tateru, click **Refresh** in the Emulator subsection — your new AVD appears in the dropdown.
+
+If you have AVDs in Android Studio but Tateru still shows none, your emulator binary may be in a non-standard location. The Emulator subsection has a **"Show paths Tateru checked"** expander listing every candidate path it tried (✓/✗) plus your `ANDROID_HOME` — use it to confirm where the SDK actually is, then point Tateru's Android SDK path at it in Settings → SDK Paths.
+
+### "Hardware acceleration unavailable" (KVM / HAXM / Hypervisor not available)
+
+The pre-flight accel-check ran `emulator -accel-check` and found acceleration is off or broken. Without it, an emulator runs in software rendering at single-digit FPS (or won't boot).
+
+**Fix by OS:**
+
+- **Linux:** install KVM — `sudo apt install qemu-kvm` (or your distro's equivalent), then add yourself to the `kvm` group: `sudo usermod -aG kvm $USER` → log out and back in.
+- **Windows:** Hyper-V and the legacy HAXM are **mutually exclusive**. Use Windows Hypervisor Platform (enable in "Turn Windows features on or off") OR remove HAXM and enable Hyper-V — not both. Reboot after changing.
+- **Mac:** Apple's Hypervisor.framework is automatic — if accel-check still fails, make sure you're on Apple Silicon or an Intel Mac with VT-x, and that no other hypervisor (an old VirtualBox/Docker config) is holding the CPU virtualization.
+
+If the check shows **"unknown"** rather than failed, the emulator binary wasn't found at all — see "No AVD found" above.
+
+### "AVD is API 30 but APK needs 33" (minSdk mismatch)
+
+The pre-flight API-level compat check compares your APK's `minSdkVersion` against the booted AVD's API level **before** install, so you see this instead of the cryptic `INSTALL_FAILED_OLDER_SDK` from `adb`.
+
+**Fix:** create or boot an AVD whose system image is at least your app's `minSdkVersion`:
+
+1. Android Studio → Virtual Device Manager → **Create Device**.
+2. On the system image step, pick an API level **≥** the number in the warning (e.g. API 33+).
+3. Back in Tateru, pick the new AVD and retry Install.
+
+(Alternatively, lower your app's `minSdkVersion` via Refinement — but matching the AVD is usually faster.)
+
+---
+
 ## iOS issues (Mac)
 
 ### iPhone doesn't appear in the device dropdown
@@ -332,27 +374,31 @@ If on 9.32.x+ and still no download: check your browser's downloads folder — t
 
 ## Cloud Sauce indicator (sidebar pill)
 
-The small LED-style pill below the app version in the sidebar shows whether the **latest** authoritative build rules (`MISTAKES.md` + `CURATED_PACKAGES.md`) from Tateru's cloud vault are in use. **Hidden by default** — only appears when you've opted into the `CLOUD_RULES` flag.
+The small LED-style line below the app version in the sidebar shows whether the **latest** authoritative build rules (`MISTAKES.md` + `CURATED_PACKAGES.md`) from Tateru's cloud vault are in use. Cloud Build Learnings is **on by default** — every install pulls the latest validated rules into Bob's knowledge. A **white LED** on Bob's pipeline tile lights when cloud rules are actually being used in a build.
 
-See [Settings → Cloud Sauce indicator](SETTINGS_REFERENCE.md#cloud-sauce-indicator) for full state table + enable instructions. Common issues below.
+See [Settings → Cloud Sauce indicator](SETTINGS_REFERENCE.md#cloud-sauce-indicator) for the full state table. Common issues below.
 
-### Pill doesn't appear in the sidebar
+### "Connect once" — does Cloud Build Learnings block my first build if I'm offline?
 
-Expected — it's off by default. To enable, add `CLOUD_RULES=1` to your user data .env:
+No. It's **fail-open**: if you're offline, not signed in, or the cloud is unreachable, builds run on the **bundled rules** that shipped with your version — exactly as before. Nothing blocks, including a fresh first build with no internet. The pre-flight no longer 412-blocks on a missing cloud connection; the bundled `MISTAKES.md` is always the fallback.
+
+The sidebar line is honest about this: it reads **"Bundled rules · cloud off"** (or offline) when it can't reach the vault, and the live **"Cloud sauce vN · latest"** when it can.
+
+### I want to turn Cloud Build Learnings off
+
+Set `CLOUD_RULES=false` in your user data .env and restart Tateru:
 
 - **Linux:** `~/.config/tateru-pro-plus/.env`
 - **macOS:** `~/Library/Application Support/tateru-pro-plus/.env`
 - **Windows:** `%APPDATA%/tateru-pro-plus/.env`
 
-Restart Tateru after editing.
+Bob then uses only the bundled rules that shipped with your version.
 
 ### Pill stays on 🔵 "offline" after clicking Pull (cache populated, but never reaches 🟢 "latest")
 
-This is the most common state for dogfood installs as of the most recent dev tree. The cache pulled successfully (you'd see 🟡 **not downloaded** if it had failed) — Bob IS loading your freshly-pulled rules. The pill just can't verify "latest" because the cloud's cheap version-check endpoint (`GET /api/v1/rules/version`) isn't reachable from your install.
+The cache pulled successfully (you'd see 🟡 **not downloaded** if it had failed) — Bob IS loading your freshly-pulled rules. The pill just can't verify "latest" because the cloud's cheap version-check endpoint (`GET /api/v1/rules/version`) isn't reachable from your install (offline, behind a proxy/firewall, or a transient cloud outage).
 
-**Why:** As of 2026-05-23 the new `/version` endpoint hasn't been deployed to Railway yet. Once it ships, the pill will flip to 🟢 **latest** on the next window-focus check (within 60 seconds).
-
-**Workaround:** none needed — the rules are working. The pill is being honest about not being able to confirm "latest" without verification. This is the **no-false-positive design** — we'd rather show 🔵 offline than mislead you into thinking you're current when we don't actually know.
+**Workaround:** none needed — the rules are working. The pill is being honest about not being able to confirm "latest" without verification. This is the **no-false-positive design** — we'd rather show 🔵 offline than mislead you into thinking you're current when we don't actually know. Once the version-check endpoint is reachable again, the pill flips to 🟢 **latest** on the next window-focus check (within 60 seconds).
 
 ### 🟡 "not downloaded" — Pull button does nothing / spins forever
 
@@ -371,7 +417,7 @@ If it keeps reverting to 🟠 immediately after every pull, that's a bug — ple
 
 ### I want to revert to bundled rules
 
-Set `CLOUD_RULES=0` (or delete the line) in your user data .env. Restart Tateru. The pill disappears and Bob falls back to the bundled `MISTAKES.md` + `CURATED_PACKAGES.md` that shipped with this Tateru version. The cache on disk is harmless and can be ignored or deleted.
+Set `CLOUD_RULES=false` in your user data .env. Restart Tateru. The sidebar line shows **"Bundled rules · cloud off"** and Bob falls back to the bundled `MISTAKES.md` + `CURATED_PACKAGES.md` that shipped with this Tateru version. The cache on disk is harmless and can be ignored or deleted.
 
 ### Cache seems corrupted — delete and re-pull
 
@@ -501,6 +547,17 @@ Cascading failure from a broken pubspec.yaml — see "Build pipeline issues / 'F
 
 Set via Settings → AI Providers → Anthropic. If already set + still seeing this on Diagnose specifically, mod 10.104 (9.32.x+) added a cached client accessor — upgrade.
 
+### `Z_AI_API_KEY not configured` (or a Z.ai / GLM-4.6 build fails to start)
+
+You picked the **Bob: Z.ai GLM-4.6** preset (or set a `glm-4.6` model on an agent) in Settings → Build Model Config, but no Z.ai key is saved.
+
+**Fix:**
+
+1. Settings → **AI Providers** → the **Z.AI** card → paste your key → **Test** → **Save**. (Or set `Z_AI_API_KEY` in your user data .env and restart.)
+2. Retry the build.
+
+If you don't want to use Z.ai, switch the preset back to **Bob: Anthropic Sonnet** (the default) in Build Model Config — that uses your existing Anthropic key.
+
 ### `Bad escaped character in JSON at position N`
 
 Doc-Tor or DocSmith emitted invalid JSON escape. Mod 10.115 + 10.131 (9.32.13+) state-machine repair fixes this. Upgrade.
@@ -515,7 +572,7 @@ Either `file_picker 5.x/6.x` (Bob's SAFE_VERSIONS should pin to ^8.1.7) or `reco
 
 ### `Cloud sauce vN · offline` after a successful Pull
 
-Cache populated, but cloud version-check endpoint isn't reachable from your install. As of 2026-05-23 the `/api/v1/rules/version` endpoint isn't deployed to Railway yet — your cached rules ARE working; the pill just can't confirm "latest" without verification. See [Cloud Sauce indicator](#cloud-sauce-indicator-sidebar-pill) above.
+Cache populated, but the cloud version-check endpoint (`/api/v1/rules/version`) isn't reachable from your install (offline, proxy/firewall, or transient cloud outage) — your cached rules ARE working; the pill just can't confirm "latest" without verification. See [Cloud Sauce indicator](#cloud-sauce-indicator-sidebar-pill) above.
 
 ### `Expected ':' on line N column 1` (in pubspec.yaml)
 
@@ -524,6 +581,10 @@ Dart `//` comments leaked into pubspec content. Mod 10.130 (9.32.13+) defensive 
 ### `Failed to update packages` (during flutter pub get)
 
 Either a hallucinated package name (see [Could not find package](#could-not-find-package-just_audio_equalizer)) OR a network issue — check your internet.
+
+### `INSTALL_FAILED_OLDER_SDK` (installing to an emulator or device)
+
+The target's API level is lower than your app's `minSdkVersion`. Tateru's emulator pre-flight catches this and warns "AVD is API 30 but APK needs 33" before install. See [Android Emulator (AVD) issues](#android-emulator-avd-issues) above — use an AVD/device whose system image is at least your `minSdkVersion`.
 
 ### `'rm' is not recognized` on Windows during website regenerate
 

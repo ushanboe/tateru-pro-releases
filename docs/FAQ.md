@@ -1,6 +1,8 @@
 # Frequently Asked Questions
 
 **App:** Tateru Pro
+**Version:** 1.0.0-beta.9.34.15
+**Last updated:** 2026-06-08
 
 ---
 
@@ -14,16 +16,16 @@ Tateru Pro builds real, installable Android apps (and iOS / macOS, experimentall
 
 Calibrated against real-world spend across Phase 20–22 builds (Retrowind, ClassiPod, Rewind, Hauntly).
 
-| Build complexity | Approximate Anthropic spend (Balanced preset) | Build time |
+| Build complexity | Approximate spend (Bob: Anthropic Sonnet preset, with prompt caching) | Build time |
 |---|---|---|
 | Tiny utility (calculator, timer) | $2–$6 | 20–30 min |
 | Typical (todo app, journal, music player) | $6–$20 | 30–60 min |
 | Complex (multi-screen with AI features) | $20–$50 | 60+ min |
 | Refinement cycles | $1–$6 each | 5–15 min each |
 
-Money goes to Anthropic directly via your BYOK key — Tateru doesn't take a cut.
+Money goes to your AI provider directly via your BYOK key — Tateru doesn't take a cut.
 
-You can lower this with the **Budget** preset (Haiku-only, ~$1–$4/build) at the cost of more refinement cycles. Or push DocTor + Bob + Agent Orange to a cheaper tier in Settings → Build Model Config.
+You can lower this two ways in Settings → Build Model Config: pick the **Bob: Z.ai GLM-4.6** preset (~$1.90/build, set `Z_AI_API_KEY` first), or push individual agents to a cheaper tier. Anthropic prompt caching is on by default and already cuts cost ~50%.
 
 ---
 
@@ -104,9 +106,84 @@ the change — most issues clear in one or two cycles.
 
 ---
 
+## Can I pick the look and feel of my app?
+
+Yes. When you create a project, the New Project flow has a **Look & Feel** step where you
+pick a **vibe → colour scheme → font** (10 vibes × 10 colour schemes × 10 fonts) with a
+live preview. Picking a vibe pre-selects a cohesive default colour + font that you can
+override. Light + dark variants of each scheme are generated automatically.
+
+The chosen theme is built into a good-looking *functional* app — Tateru's proven build
+pipeline does the work, so you get the styling without sacrificing a working app. If you
+just want a plain build, hit **Skip** and the picker is bypassed entirely.
+
+(This replaces the older standalone "Themed Build" sidebar entry and the separate
+theme-picker step — both are gone — and supersedes the external tateru-ux tool.)
+
+---
+
+## What model is used for each part of a build, and can I change it?
+
+Yes — Settings → **Build Model Config** has presets plus per-agent overrides. The headline
+choice is Bob the Builder's model (Bob is ~70% of build cost), so presets are named after
+it: **Bob: Z.ai GLM-4.6** (cheapest), **Bob: Anthropic Sonnet** (default), **Bob: Anthropic
+Opus** (highest quality). ThinkerBell + Build Architect are pinned to Sonnet on the cheaper
+presets because they emit large structured JSON that smaller models truncate.
+
+There are also dedicated model pickers in Settings for:
+- **Audit Model** — the GreenThumb audit agents (default Sonnet 4.6).
+- **Website Model** — GreenThumb marketing-site generation (default Sonnet 4.6).
+- **Refinement Model** — the Refine agent that applies fixes (default Sonnet 4.6).
+
+---
+
+## How do I build apps more cheaply?
+
+Two levers, both in Settings:
+
+1. **Prompt caching (automatic).** Anthropic prompt caching is on by default and cuts
+   build cost roughly in half by reusing Bob's large repeated prompt prefix across rounds.
+   A small **purple LED** lights on a pipeline tile when that agent is getting cache hits.
+2. **Z.ai GLM-4.6 (opt-in).** Settings → AI Providers has a Z.AI card. Set your
+   `Z_AI_API_KEY`, then pick the **Bob: Z.ai GLM-4.6** preset in Build Model Config. It's a
+   much cheaper Bob alternative (~$1.90/build vs ~$2.50 on Sonnet).
+
+---
+
+## What's the Cloud Build Learnings / "sauce" indicator?
+
+Every install now pulls the latest validated build-rules from Tateru's cloud into Bob's
+knowledge — not just the rules baked into the binary — so the app gets smarter over time as
+fixes are validated centrally. A **"sauce line"** under the version number in the sidebar
+plus a **white LED** on Bob's pipeline tile show when cloud rules are live.
+
+This is **on by default**. It's fail-safe: if you're offline or not signed in, builds run on
+the bundled rules exactly like before — nothing blocks. To opt out, set `CLOUD_RULES=false`.
+
+---
+
+## Can I deploy to an Android emulator instead of a real phone?
+
+Yes. The Android deploy card has an **Emulator** subsection: pick an AVD → **Boot** (4-stage
+progress) → **Install** (auto-launches the app). Works on Linux, Mac, and Windows. Pre-flight
+checks confirm hardware acceleration and API-level compatibility (it warns "AVD is API 30 but
+APK needs 33" before installing). Requires Android Studio's emulator plus at least one AVD
+created.
+
+---
+
 ## Why do my refinement-rebuild cycles use tokens?
 
 Refinement Agent re-reads the relevant project files + writes the fixed version. Cost depends on the size of the change but is usually $0.50–$3 per refinement.
+
+---
+
+## Where did "Decide" / Trend Cast / launch prediction go?
+
+Trendcast (the Decide / Predict step) is **disabled by default** and its UI is hidden. The
+prediction sidecar no longer spawns — it was unrelated to building apps and caused a Windows
+`cmd.exe` startup popup. If you want it back, set `TRENDCAST_ENABLED=true`. Everything else in
+the build pipeline (Discover / Develop / Launch) is unaffected.
 
 ---
 
@@ -141,12 +218,15 @@ To shrink:
 
 ## I'm on Mac — can I deploy to iPhone?
 
-Yes. One-time setup per project:
-1. Open `<projectDir>/ios/Runner.xcworkspace` in Xcode.
-2. Target Runner → Signing & Capabilities → tick "Automatically manage signing" → pick your Apple Developer Team.
-3. Save, quit Xcode.
-4. Plug in your iPhone, trust the Mac.
-5. Pipeline page → iOS section → pick your iPhone → Install & Run on iOS.
+Yes, and signing is now auto-detected. On your first iOS build Tateru reads your Apple
+Developer Team ID from the macOS keychain, so you no longer have to do the Xcode "Signing &
+Capabilities" dance. Just:
+
+1. Plug in your iPhone, trust the Mac.
+2. Pipeline page → iOS section → pick your iPhone → Install & Run on iOS.
+
+If you belong to **more than one** Apple Developer team, set the right one explicitly in
+Settings → **Apple Developer Team ID** so Tateru picks the correct team.
 
 Tateru's `flutter build ios --release` uses your team's automatic provisioning. Works with both free Apple Developer accounts (7-day expiry) and paid accounts ($99/year, 1-year provisioning).
 
@@ -218,4 +298,4 @@ For build-pipeline bugs specifically, the **Diagnose** button on a failed build 
 
 ---
 
-Last updated: 2026-05-07
+Last updated: 2026-06-08

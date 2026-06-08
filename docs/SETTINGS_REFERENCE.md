@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.32.13
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-11
+**Last updated:** 2026-06-08
 ---
 
 # Settings Reference
@@ -16,13 +16,24 @@ The Settings page is one long scrollable form. Sections appear in this order in 
 2. [AI Providers](#ai-providers)
 3. [Build Model Config](#build-model-config)
 4. [Audit Model](#audit-model)
-5. [SDK Paths](#sdk-paths)
-6. [Telegram Notifications](#telegram-notifications)
-7. [Build Learnings](#build-learnings)
-8. [Cloud Sauce indicator](#cloud-sauce-indicator)
-9. [System Info](#system-info)
-10. [Diagnostics](#diagnostics)
-11. [About](#about)
+5. [GreenThumb Website Model](#greenthumb-website-model)
+6. [Refinement Agent Model](#refinement-agent-model)
+7. [SDK Paths](#sdk-paths)
+8. [Apple Developer Team ID](#apple-developer-team-id)
+9. [Auto-Refine build failures (experimental)](#auto-refine-build-failures-experimental)
+10. [Telegram Notifications](#telegram-notifications)
+11. [Build Learnings](#build-learnings)
+12. [Cloud Sauce indicator](#cloud-sauce-indicator)
+13. [Power user mode](#power-user-mode)
+14. [Privacy & Reset](#privacy--reset)
+15. [System Info](#system-info)
+16. [Diagnostics](#diagnostics)
+17. [About](#about)
+
+### Removed / disabled in this version
+
+- **Themed builds toggle** — *removed.* Look & feel (vibe → colour scheme → font) is now chosen in **New Project**, not in Settings.
+- **Trendcast (Decide / Predict)** — *disabled by default.* The prediction sidecar no longer spawns and the Decide/Predict UI is hidden. Re-enable with `TRENDCAST_ENABLED=true`.
 
 ---
 
@@ -70,7 +81,7 @@ API keys for the LLM providers Tateru uses. Each provider has its own card.
 
 ### Per-provider card
 
-For each of 6 providers (Anthropic / OpenAI / Google / Moonshot / DeepSeek / Ollama Cloud):
+For each provider (Anthropic / OpenAI / Google / Moonshot / Z.AI / DeepSeek / Ollama Cloud):
 
 | Field / button | What it does |
 |---|---|
@@ -88,6 +99,7 @@ For each of 6 providers (Anthropic / OpenAI / Google / Moonshot / DeepSeek / Oll
 | **OpenAI** (GPT, DALL-E) | [platform.openai.com](https://platform.openai.com) → API keys → Create new secret key |
 | **Google** (Gemini) | [aistudio.google.com](https://aistudio.google.com) → Get API Key |
 | **Moonshot** (Kimi) | [platform.moonshot.cn](https://platform.moonshot.cn) (Chinese site; English available) |
+| **Z.AI** (GLM-4.6) | [z.ai](https://z.ai) → API platform → API Keys. Stored as `Z_AI_API_KEY`. Powers the **GLM-4.6** model — a much cheaper Bob alternative (~$1.90/build vs ~$2.50 on Sonnet). |
 | **DeepSeek** | [platform.deepseek.com](https://platform.deepseek.com) → API Keys |
 | **Ollama Cloud** | [ollama.com/cloud](https://ollama.com/cloud) → Subscribe → Get API Key |
 
@@ -120,27 +132,33 @@ Pick which AI model runs each agent in the build pipeline. This is where you tun
 
 #### Mode A — Preset (default)
 
-Pick one of 5 preset cards. Each card shows: cost-per-build estimate, build-time estimate, quality rating, when to use it.
+The presets are split into **two rows** — one per pipeline:
 
-| Preset | Cost / build | Build time | Quality | Best for |
-|---|---|---|---|---|
-| **Budget** | ~$1–$4 | 20–40 min | Basic | Prototyping ideas |
-| **Balanced** (recommended) | ~$6–$20 | 30–60 min | High | Most builds |
-| **Premium** | ~$20–$50 | 30–60 min | Best | Complex apps, critical builds |
-| **DeepSeek Hybrid** | ~$4–$10 | 30–60 min | High | Cost-saver — DeepSeek on analysis, Sonnet on code-gen |
-| **Hybrid Cloud + qwen3** | ~$2–$6 | 30–60 min | High | Requires Ollama Cloud subscription |
+- **Brief pipeline** — the standard AI Spec / Discover / Manual / JSON / Clone build flow (Bob the Builder generates code from a spec).
+- **Design pipeline** — the design-driven flow (DesignBob builds against a chosen screen design).
 
-Click a preset → all 9 agents are set to that preset's choices. Changes take effect immediately for the next build.
+Each preset is **named after the model Bob runs**, since Bob is the single biggest driver of build cost and quality:
+
+| Preset | Bob runs on | Notes |
+|---|---|---|
+| **Bob: Anthropic Sonnet** (default) | Claude Sonnet | Recommended — best balance of cost + quality for most builds |
+| **Bob: Z.ai GLM-4.6** | GLM-4.6 (Z.AI) | Cheapest — ~$1.90/build. Requires `Z_AI_API_KEY` set in AI Providers |
+| **Bob: Anthropic Sonnet Pro** | Claude Sonnet | Higher-effort Sonnet pass for complex apps |
+| **Bob: Anthropic Opus** | Claude Opus | Best quality, highest cost — complex/critical builds |
+
+Each preset card shows a cost-per-build estimate, build-time estimate, quality rating, and when to use it. Click a preset → all agents are set to that preset's choices. Changes take effect immediately for the next build.
+
+**ThinkerBell + Build Architect are pinned to Sonnet on the cheap presets** (e.g. Bob: Z.ai GLM-4.6). These two agents emit large structured JSON that smaller/cheaper models tend to truncate or malform, which breaks the rest of the pipeline — so they stay on Sonnet even when Bob is on a cheaper model.
 
 #### Mode B — Customize per agent
 
-Click "Customize per agent" link below the presets → a 9-row table appears. For each agent (Distill / Architect / Docs / Build / Icons / Post Docs / Review / Test / Audit):
+Click "Customize per agent" link below the presets → a per-agent table appears. For each agent — Distiller / Thinker Bell / Build Architect / Doc-Tor / Bob the Builder / **Design Bob** / **Design Doc-Tor** / Icon Generator / DocSmith / Agent Orange / **Refinement Agent** / Test Generator / Feature Auditor:
 
 - **Agent name** column (fixed-width)
 - **Phase** column (e.g. "DISTILLATION", "BUILD")
-- **Model** dropdown — every model from your configured providers + recommended star indicator on safe defaults
+- **Model** dropdown — every model from your configured providers (including GLM-4.6 when `Z_AI_API_KEY` is set) + recommended star indicator on safe defaults
 
-Pick whatever you want for each. Custom configs are saved per-project (each new project starts from your current preset choice but can be overridden).
+The customizer includes the **design-pipeline agents** (Design Bob + Design Doc-Tor) and the **Refinement Agent** alongside the standard build agents. Pick whatever you want for each. Custom configs are saved per-project (each new project starts from your current preset choice but can be overridden).
 
 ### What each agent uses the model for
 
@@ -196,6 +214,28 @@ Cards for providers you haven't configured (no API key in AI Providers section) 
 | GPT-4o | $0.20–$0.80 |
 | GPT-4o Mini | $0.02–$0.10 |
 | Haiku 4.5 | $0.05–$0.20 |
+
+---
+
+## GreenThumb Website Model
+
+Single dropdown — picks the model used to generate the GreenThumb marketing website (hero, features, copy, per-app chat route).
+
+- **Default: Sonnet 4.6** — recommended for most site generations. A whitelist + post-generation validator catches any hallucinated `lucide-react` icon names regardless of model, but Sonnet rarely needs the safety net.
+- Curated dropdown of the same model classes as Audit Model (Sonnet 4.6 / Opus 4.6 / GPT-4o / GPT-4o Mini / Haiku 4.5). Cheaper models are cost-attractive but more prone to hallucinated icons + off-brand copy.
+
+Cards for providers you haven't configured (no API key in AI Providers) appear greyed out.
+
+---
+
+## Refinement Agent Model
+
+Single dropdown — picks the model used by the Refinement Agent (the agent that applies "fix this / change that" instructions to a built app and the auto-Refine recovery loop).
+
+- **Default: Sonnet 4.6** — recommended. Refinement is the user-facing recovery path, so speed-to-fix matters more than per-call cost.
+- Curated dropdown (Sonnet 4.6 / Opus 4.6 / GPT-4o / GPT-4o Mini / Haiku 4.5). Some users flip this to Opus for harder multi-step root-cause fixes.
+
+Before this picker existed, the Refinement Agent silently fell back to the default model; the explicit slot makes the choice visible and per-machine persistent.
 
 ---
 
@@ -263,6 +303,35 @@ After Save & Re-detect, the path is also persisted as the corresponding env var 
 
 ---
 
+## Apple Developer Team ID
+
+**(Mac only — iOS signing.)** The Apple Developer Team ID Tateru uses to sign iOS builds for install on a real iPhone.
+
+- **Auto-detected from the macOS keychain** on your first iOS build, so you don't have to do the Xcode "Signing & Capabilities" dance.
+- This field lets you **set it explicitly** — needed if your keychain has **multiple Developer Teams** (Tateru can't guess which one), or to override the auto-detected value.
+- Get your Team ID from [developer.apple.com/account](https://developer.apple.com/account) → Membership.
+
+If left blank, Tateru auto-detects. If a single team is in your keychain, the auto-detection just works. If multiple teams are present and this field is empty, the iOS build surfaces an error listing the detected teams and pointing you here.
+
+---
+
+## Auto-Refine build failures (experimental)
+
+A toggle (**default OFF**) that turns build-failure recovery into an autonomous loop. When ON, a failed build automatically runs **Diagnose → Refine → Re-build**, repeating until it recovers or hits one of your limits — then surfaces a report if it couldn't.
+
+### Controls
+
+| Control | What it does |
+|---|---|
+| **Master toggle** | Default OFF. When OFF, build failures behave as before (manual Diagnose + Refine). |
+| **Max cycles** (slider) | Hard cap on how many Diagnose → Refine → Re-build cycles the loop attempts before stopping. |
+| **Cost ceiling** | A spend cap (BYOK LLM cost). The loop hard-stops before a cycle that would exceed the ceiling — so it can never run away with your API spend. |
+| **Pause on low confidence** | When ON, the loop halts (instead of attempting a probably-wrong fix) if Diagnose reports low confidence in its diagnosis. |
+
+You can cancel the loop at any time. It's experimental — opt in deliberately. The cycle cap + cost ceiling + pause-on-low-confidence together bound the worst case.
+
+---
+
 ## Telegram Notifications
 
 Tateru can send build status notifications to a Telegram chat. Useful when builds run on your desktop and you're away from the screen.
@@ -307,7 +376,13 @@ The bot token + Chat ID never leave your machine — Tateru talks to Telegram's 
 
 ## Build Learnings
 
-Manage the local-only learnings collected from your Diagnose+fix cycles. The Build Learnings program is Tateru's self-improving feedback loop — each fix you save makes future builds smarter.
+Manage the learnings collected from your Diagnose+fix cycles. The Build Learnings program is Tateru's self-improving feedback loop — each fix you save makes future builds smarter.
+
+### Cloud rules — ON by default
+
+Every install now pulls the latest validated build-rules from the cloud into Bob's knowledge (not just the rules baked into the binary), so fixes reach you between Tateru releases. This is **on by default** — a "sauce line" under the version number in the sidebar + a white LED on Bob's pipeline tile show when cloud rules are live.
+
+**Fail-safe:** if you're offline or not signed in, builds run on the bundled rules exactly like before — nothing blocks. Opt out with `CLOUD_RULES=false` in your `.env`.
 
 ### Status row
 
@@ -406,6 +481,25 @@ The pill works identically for Pro Annual users — pulling rules is **inbound**
 - **"I clicked Pull and got 🔵 offline instead of 🟢 latest"** → Cache was populated successfully (you'd see 🟡 if it had failed). The cloud's cheap version-check endpoint (`/api/v1/rules/version`) just isn't reachable from your install yet. As of the most recent dev tree, the endpoint hasn't been deployed to Railway — see Troubleshooting for details. Bob is still using the new cached rules in the meantime.
 - **"Pull button does nothing"** → Check Tateru cloud auth. The pull requires a valid license JWT (same auth as the rest of the cloud). Sign out + back in if needed.
 - **"I want to revert to bundled rules"** → Set `CLOUD_RULES=0` (or remove the line) + restart. The cache is left on disk but ignored.
+
+---
+
+## Power user mode
+
+A toggle that enables advanced controls for users who want more direct pipeline control.
+
+- When ON, the **"Restart from phase…"** control appears on the Pipeline page — letting you re-run the build from a chosen pipeline phase instead of only restarting the whole pipeline.
+- Off by default. Turn it on if you understand the pipeline phases and want to surgically re-run part of a build.
+
+---
+
+## Privacy & Reset
+
+Tools to wipe locally-stored credentials + data without losing your built apps.
+
+- **Reset** wipes your saved **API keys** (the `.env`) and the local **database** (`tateru.db`), giving you a clean slate.
+- Your **projects and built APKs** are **kept** — `projects/` and `output_apps/` are preserved.
+- Use this to clear out test keys/data, or to hand a machine over without leaking credentials, while keeping your existing work.
 
 ---
 

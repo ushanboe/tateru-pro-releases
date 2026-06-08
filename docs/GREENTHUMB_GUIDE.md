@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.32.13
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-11
+**Last updated:** 2026-06-08
 ---
 
 # GreenThumb — audit + marketing site generator
@@ -14,6 +14,18 @@ GreenThumb is Tateru's "App Polisher" — it takes a finished app project and he
 2. **Generates a Next.js marketing website** ready to deploy to Vercel (or anywhere that hosts Next.js)
 
 You access it via the sidebar: **Website & Docs**.
+
+---
+
+## Prerequisites — Node.js LTS (GreenThumb only)
+
+GreenThumb runs on **Mac, Windows, and Linux** — the audit + marketing-site generator works on all three platforms.
+
+GreenThumb is the **only** part of Tateru that needs **Node.js**. Install **Node.js LTS** (18 or newer) before generating or previewing a website: the marketing-site generator runs `npm install` plus a Next.js preview server, both of which require Node + npm on your machine.
+
+> **Node.js is NOT needed for app builds.** The Flutter app build pipeline (Discover → Develop → Launch) does not use Node at all. You only need it for GreenThumb's website + docs generation. Install it from [nodejs.org](https://nodejs.org/en/download).
+
+If Node isn't installed, the audit checks still run fine — only the website-generation + preview steps require it.
 
 ---
 
@@ -197,7 +209,20 @@ The marketing angle flows verbatim into Doc-Tor's prompt so it shapes every gene
 
 **Validation:** the Resolve button is disabled (greyed out) until you've picked a preset or typed a custom brief. Empty briefs were silently allowed pre-9.32.13 and produced generic off-brand copy — now blocked.
 
-#### Section 4 — Chatbot Model (mod 10.101)
+#### Section 4 — Website Model
+
+Picks which AI **generates the marketing site itself** — the hero, features, use cases, and requirements sections. This is distinct from the Chatbot Model below (which only powers the deployed site's chat widget):
+
+| Option | Best for |
+|---|---|
+| **Claude Sonnet 4.6** (default) | Recommended — best balance of quality + cost for site copy. |
+| **Claude Opus** | Highest-quality copy for premium / flagship sites. |
+| **GPT-4o** | OpenAI alternative. |
+| **GPT-4o Mini** | Cheapest. |
+
+The Website Model defaults to **Sonnet 4.6** and can also be set globally in **Settings → Website Model** (the picker here overrides it per-site). The generation pipeline below uses whichever model you pick.
+
+#### Section 5 — Chatbot Model (mod 10.101)
 
 Picks which AI powers the marketing site's chat widget:
 
@@ -226,7 +251,7 @@ Click **Approve & Generate** → kicks off the generation pipeline.
 ### Generation pipeline (~3–8 min)
 
 1. Copy the marketing-web template to `~/.tateru-pro/websites/<AppName>-web/`
-2. Generate hero + features + use cases + requirements sections via LLM (uses your configured Audit Model — defaults to Sonnet 4.6)
+2. Generate hero + features + use cases + requirements sections via LLM (uses your configured **Website Model** — defaults to Sonnet 4.6)
 3. Generate the per-app chatbot system prompt (uses the picked Chatbot Model)
 4. Render Privacy / Terms / User Manual / Quick Start as HTML pages
 5. Generate matching PDFs of each doc (if Puppeteer's Chromium is available; otherwise PDF download links 404 — HTML pages still render — mod 10.99 graceful degradation)
@@ -362,7 +387,7 @@ Mod 10.86 (9.32.x) fixed this via the fetch+blob+ObjectURL pattern + Electron `w
 
 ### "rsync / cp / pgrep is not recognized" on Windows during regenerate
 
-The website-regenerate flow uses Unix shell commands in the website backup + restore + cleanup paths. Mod 10.125 (9.32.13+) replaced 6 `rm -rf` calls with cross-platform `fs.rm`. Three more sites (rsync@611, cp@621, pgrep@774) are tracked as 10.125b for the next release. Workaround pre-fix: regenerate website on a Linux/Mac machine, copy the result via Save to Local + commit to git.
+GreenThumb generates + previews websites on **Mac, Windows, and Linux** (just install Node.js LTS first — see Prerequisites above). The core generate + preview flow is cross-platform. A small number of website **regenerate / stop** paths historically used Unix shell commands; mod 10.125 (9.32.13+) replaced 6 `rm -rf` calls with cross-platform `fs.rm`, and the remaining sites (rsync@611, cp@621, pgrep@774) are tracked as 10.125b. If you hit a "not recognized" error specifically while stopping/regenerating an existing preview on Windows, restart Tateru and re-run, or delete the site with **Delete Website** and generate fresh.
 
 ---
 

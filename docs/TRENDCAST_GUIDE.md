@@ -1,12 +1,20 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.32.13
+**Version:** 1.0.0-beta.9.34.15
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-05-11
+**Last updated:** 2026-06-08
 ---
 
 # Trend Cast — predicting your app's launch performance
+
+> ⚠️ **Trendcast is DISABLED by default in current builds.**
+>
+> As of version **1.0.0-beta.9.34.15**, the Decide/Predict feature is **hidden in the sidebar** and the prediction sidecar **does not run** on startup. The Python sidecar previously spawned automatically and (on Windows) caused a `cmd.exe` popup — it was unrelated to app building, so it has been switched off by default.
+>
+> **To re-enable it**, set the environment variable `TRENDCAST_ENABLED=true` in your environment before launching Tateru.
+>
+> **Trendcast has no effect on building apps.** The core app-build pipeline (Discover → Develop → Launch) is completely independent of Trendcast — disabling it does not change anything about how your apps are built. Everything below describes how Trend Cast works **when it is enabled**.
 
 Trend Cast is Tateru's "Decide" tool — a 200-AI-agent simulation that predicts how your app will perform on the Play Store before you ship it. Think of it as a focus group made of synthetic users who behave like real ones, but at 1000× the speed and a fraction of the cost.
 
