@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.34.15
+**Version:** 1.0.0-beta.9.34.16.13
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-06-08
+**Last updated:** 2026-06-09
 ---
 
 # Settings Reference
@@ -97,9 +97,9 @@ For each provider (Anthropic / OpenAI / Google / Moonshot / Z.AI / DeepSeek / Ol
 |---|---|
 | **Anthropic** (Claude) | [console.anthropic.com](https://console.anthropic.com) → API Keys → Create Key |
 | **OpenAI** (GPT, DALL-E) | [platform.openai.com](https://platform.openai.com) → API keys → Create new secret key |
-| **Google** (Gemini) | [aistudio.google.com](https://aistudio.google.com) → Get API Key |
+| **Google** (Gemini) | [aistudio.google.com](https://aistudio.google.com) → Get API Key. Stored as `GEMINI_API_KEY`. Powers the **Gemini 3 Pro** option in the freeform website designer (multimodal — designs around your real screenshots). |
 | **Moonshot** (Kimi) | [platform.moonshot.cn](https://platform.moonshot.cn) (Chinese site; English available) |
-| **Z.AI** (GLM-4.6) | [z.ai](https://z.ai) → API platform → API Keys. Stored as `Z_AI_API_KEY`. Powers the **GLM-4.6** model — a much cheaper Bob alternative (~$1.90/build vs ~$2.50 on Sonnet). |
+| **Z.AI** (GLM-4.6 / GLM-5 / GLM-5.2) | [z.ai](https://z.ai) → API platform → API Keys. Stored as `Z_AI_API_KEY`. Powers **GLM-4.6** + **GLM-5** (cheap Bob alternatives — GLM-4.6 ~$1.90/build vs ~$2.50 on Sonnet; GLM-5 is the stronger successor, available now) and the pre-staged **GLM-5.2** (1M context; account standalone-API access pending — see Build Model Config). |
 | **DeepSeek** | [platform.deepseek.com](https://platform.deepseek.com) → API Keys |
 | **Ollama Cloud** | [ollama.com/cloud](https://ollama.com/cloud) → Subscribe → Get API Key |
 
@@ -143,6 +143,8 @@ Each preset is **named after the model Bob runs**, since Bob is the single bigge
 |---|---|---|
 | **Bob: Anthropic Sonnet** (default) | Claude Sonnet | Recommended — best balance of cost + quality for most builds |
 | **Bob: Z.ai GLM-4.6** | GLM-4.6 (Z.AI) | Cheapest — ~$1.90/build. Requires `Z_AI_API_KEY` set in AI Providers |
+| **Bob: Z.ai GLM-5** | GLM-5 (Z.AI) | GLM-4.6 successor — stronger coding + reasoning, 200K context, **available now**. Requires `Z_AI_API_KEY`. Verify a clean build before trusting on the hot path. |
+| **Bob: Z.ai GLM-5.2 (pre-staged)** | GLM-5.2 (Z.AI) | 1M context, coding-first. **Pre-staged** — selectable now but builds fail with a 403 until your Z.ai account gets standalone-API access (GLM-5.2 shipped to the GLM Coding Plan first; the public API GA'd ~a week later). Lights up automatically once granted. |
 | **Bob: Anthropic Sonnet Pro** | Claude Sonnet | Higher-effort Sonnet pass for complex apps |
 | **Bob: Anthropic Opus** | Claude Opus | Best quality, highest cost — complex/critical builds |
 

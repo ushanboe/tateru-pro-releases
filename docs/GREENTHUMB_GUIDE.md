@@ -1,9 +1,9 @@
 ---
 **App:** Tateru Pro
-**Version:** 1.0.0-beta.9.34.15
+**Version:** 1.0.0-beta.9.34.16.13
 **Owner:** KangaBlue.au
 **Contact:** support@tateru.app
-**Last updated:** 2026-06-08
+**Last updated:** 2026-06-15
 ---
 
 # GreenThumb — audit + marketing site generator
@@ -267,6 +267,51 @@ Click **Approve & Generate** → kicks off the generation pipeline.
 | **Download zip** | Full site source as a zip. Extract anywhere; deploy via your own pipeline. Visible feedback "✓ Saved (NN KB)" after download (mod 10.86, 10.87 — fixed Electron download flow). |
 | **Regenerate Website** | Rebuild from scratch. Preserves screenshots. |
 | **Delete Website** | Remove the site dir. Asks for confirmation. Doesn't touch the AuditJob row. |
+
+---
+
+## Freeform website designer (experimental)
+
+Alongside the templated GreenThumb site, Tateru has a **freeform website designer** — an experimental alternative. Where GreenThumb fills a fixed Next.js template component-by-component, the freeform designer hands ALL of your app's real content (name, description, features, the user manual + quick-start + legal docs, the icon, and your real screenshots as visual reference) to one capable design model and asks it to design + build a complete, bespoke, **animated** single-page marketing site from scratch. The output is a single self-contained `index.html` (Tailwind + an animation library via CDN) — no `npm install`, no build step; it just opens in a browser.
+
+You'll find it in the **Audit Report** (after running an audit), in its own panel below the GreenThumb website generator.
+
+### How it works
+
+1. **Pick a model** (dropdown before Generate):
+   - **Claude Opus 4.8** — recommended default. Reliable, top design quality, sees your screenshots (vision).
+   - **Claude Fable 5** — premium; may fall back to Opus if your account lacks access.
+   - **Claude Sonnet 4.6** — faster / cheaper (also vision).
+   - **Gemini 3 Pro** — Google; strong design + multimodal (designs around your screenshots). Needs a Google API key (`GEMINI_API_KEY`) in Settings → AI Providers.
+   - **GLM-5 (Z.ai)** — coding-strong; **text-only here** (it does NOT see your screenshots), needs `Z_AI_API_KEY`.
+   - **GLM-5.2 (Z.ai)** — pre-staged; selectable now but builds fail until your Z.ai account gets standalone-API access.
+
+   If your chosen model is unavailable, it automatically falls back to Opus 4.8 → Sonnet 4.6, and each result shows which model actually designed it.
+
+2. **Add your real screenshots** (recommended) — the freeform panel has its own screenshot upload. The model designs the showcase AROUND them and matches the palette to your actual screens. Without screenshots it leaves clean device-frame placeholders — it will NOT fabricate fake screens.
+
+3. **Variants (1–3)** — generate 1, 2, or 3 distinct designs in parallel (each with a different steer — default / bold / minimal) so you can pick the one you like.
+
+4. **Customize Motion (✨)** — a popup that controls how animated the site is. **This is the dial to turn up if a site feels under-animated:**
+   - **Animation level** — Subtle / Balanced (default) / **Rich** / **Showcase**. Rich and Showcase make rich animation *mandatory* (maximalist) — use these for a lively, "wow" site.
+   - **Library** — Auto / GSAP + ScrollTrigger / AOS / CSS-only / Motion One.
+   - **Effects** (check any) — scroll-pinned sections, parallax, staggered text reveals, animated counters, magnetic buttons, marquee, aurora / gradient drift, 3D hover-tilt cards, scroll-progress nav, clip-path reveals.
+   - **Motion feel** (snappy / smooth / bouncy / cinematic), **Hero treatment**, an optional **reference vibe** (e.g. "Linear", "an Awwwards site of the day"), and a **reduced-motion** guard (on by default).
+
+   Your choices are remembered for next time.
+
+5. **Generate** — usually 1–3 minutes per variant. The first variant opens automatically when ready.
+
+### Refine
+
+Under each generated variant there's a refine box — type a plain-English change ("make it punchier", "darker", "more playful") and the model rewrites the whole page (re-supplying your screenshots so they stay accurate). A refine **regenerates the entire page**, so it takes about as long as a fresh generation — give it 1–3 minutes.
+
+### What you need
+
+- An API key for whichever model you pick (Anthropic for Opus/Fable/Sonnet, Google for Gemini 3, Z.ai for GLM-5/5.2) in **Settings → AI Providers**.
+- Honest content only — the designer uses your real docs and won't invent stats, ratings, or testimonials. Your Privacy + Terms are rendered verbatim; Getting Started + the User Guide present your real docs in full.
+
+> **Experimental:** the freeform designer is newer than the templated GreenThumb path and still evolving. For a predictable, deployable templated site use **Generate Marketing Website** above; use the freeform designer when you want a bespoke, animated, one-of-a-kind page.
 
 ---
 
