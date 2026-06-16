@@ -48,7 +48,7 @@ Three entry points:
 
 ### Path 1 — From a Tateru project (most common)
 
-After your build is READY, on the Pipeline page → **Send to GreenThumb** button.
+After your build is READY, on the Pipeline page → the **Build Website** card. It has three buttons — **Tateru Design** (templated, deployable), **Freeform Design** (one bespoke animated page), and **Fusion Design** (several models compete → best-of fused). Each runs the GreenThumb audit first (it gathers your docs/screenshots/icon/content), then opens the Audit Report focused on the design engine you picked.
 
 - Tateru creates an AuditJob, the audit pipeline starts immediately
 - The audit reads from `~/.tateru-pro/data/projects/<slug>/` (the live project state — mod 10.126 ensures this is the canonical source, not a stale save-local snapshot)
@@ -272,7 +272,7 @@ Click **Approve & Generate** → kicks off the generation pipeline.
 
 ## Freeform website designer (experimental)
 
-Alongside the templated GreenThumb site, Tateru has a **freeform website designer** — an experimental alternative. Where GreenThumb fills a fixed Next.js template component-by-component, the freeform designer hands ALL of your app's real content (name, description, features, the user manual + quick-start + legal docs, the icon, and your real screenshots as visual reference) to one capable design model and asks it to design + build a complete, bespoke, **animated** single-page marketing site from scratch. The output is a single self-contained `index.html` (Tailwind + an animation library via CDN) — no `npm install`, no build step; it just opens in a browser.
+Alongside the templated GreenThumb site, Tateru has a **freeform website designer** — an experimental alternative. Where GreenThumb fills a fixed Next.js template component-by-component, the freeform designer hands ALL of your app's real content (name, description, features, the user manual + quick-start + legal docs, the icon, and your real screenshots as visual reference) to one capable design model and asks it to design + build a complete, bespoke, **animated** single-page marketing site from scratch. The output is a self-contained `index.html` (Tailwind + an animation library via CDN) — no `npm install`, no build step; it just opens in a browser. The page itself is **marketing** (hero, features, showcase, a short getting-started teaser, CTA, footer); your docs (user manual, quick-start, privacy, terms) are written as **separate linked pages** next to it (`user-guide.html`, `getting-started.html`, `privacy.html`, `terms.html`) — the marketing page links to them from the nav/footer rather than dumping them inline.
 
 You'll find it in the **Audit Report** (after running an audit), in its own panel below the GreenThumb website generator.
 
@@ -309,9 +309,37 @@ Under each generated variant there's a refine box — type a plain-English chang
 ### What you need
 
 - An API key for whichever model you pick (Anthropic for Opus/Fable/Sonnet, Google for Gemini 3, Z.ai for GLM-5/5.2) in **Settings → AI Providers**.
-- Honest content only — the designer uses your real docs and won't invent stats, ratings, or testimonials. Your Privacy + Terms are rendered verbatim; Getting Started + the User Guide present your real docs in full.
+- Honest content only — the designer uses your real docs and won't invent stats, ratings, or testimonials. The marketing page **links** to your docs (Getting Started, User Guide, Privacy, Terms) as separate pages — rendered faithfully + in full, not summarised.
 
 > **Experimental:** the freeform designer is newer than the templated GreenThumb path and still evolving. For a predictable, deployable templated site use **Generate Marketing Website** above; use the freeform designer when you want a bespoke, animated, one-of-a-kind page.
+
+---
+
+## Fusion website designer (experimental)
+
+The **Fusion** designer is the multi-model big sibling of Freeform. Instead of one model designing one site, **several models each design a complete marketing page in parallel, every candidate is rendered, a vision judge ranks them, and a fuser combines the best of all into one page.** You'll find it in the **Audit Report**, in the **Fusion Site** card.
+
+### How it works
+
+```
+Distill (read docs + screenshots → brief) → Architect (brief → site spec)
+→ Builders ×N (each model builds a full site) → Render → Judge (rank) → Fuse (best-of) → ★ Fused site
+```
+
+1. **Compete** — pick **2–4** builder models: **Opus 4.8 · Sonnet 4.6 · GLM-5** (Anthropic · Z.ai). *(GPT-4o is excluded — its short output cap truncates full sites.)*
+2. **Judge / vision** — who reads the screenshots + ranks the renders: **Anthropic Sonnet 4.6** (default) or **Z.ai GLM-4.5V** (an independent judge from a different provider than the builders).
+3. **Screenshots** — same upload as Freeform (shared store). The distiller studies them; every candidate designs around them.
+4. **Customize Motion** — uses the same ✨ motion settings as Freeform (set them in the Freeform card).
+5. **Generate Fusion Site** — a live pipeline grid shows each model moving through Build → Render with a timer. When done you get a **★ Fused site** (the headline — best of all combined) plus each individual candidate with the judge's scores.
+
+Like Freeform, the page is **marketing-only** with your docs as **separate linked pages**.
+
+### What you need
+
+- API keys for the builders you pick (Anthropic for Opus/Sonnet, Z.ai for GLM) in **Settings → AI Providers**. GLM-4.5V (vision) also uses your Z.ai key.
+- It's the heaviest path — several full-site builds + a judge + a fuse — so expect **~3–7 minutes and a few dollars** (BYOK) per run.
+
+> **Experimental + note:** the **render gate + vision judge run in the packaged app** (Chromium is bundled there). In a browser/dev session the candidates still build and **Open** works, but there are no rendered thumbnails and the judge falls back to a simple heuristic (largest). The distiller's screenshot reading works everywhere.
 
 ---
 
