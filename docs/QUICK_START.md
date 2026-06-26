@@ -179,7 +179,7 @@ The app appears on your phone's home screen. Open it. You're done.
 Now that you've built your first app, explore:
 
 - **Refinement Agent** — Pipeline page → Refine App. Type "Add a dark mode toggle" or any other change → 5-15 min later your APK has the change
-- **Different Build Modes** — try Manual Entry for a hand-crafted spec, JSON Upload for a complete spec, Clone App from screenshots, or Discover to find a Play Store opportunity. (Import Project lets you continue a project exported from another machine.)
+- **Different Build Modes** — try Manual Entry for a hand-crafted spec, JSON Upload for a complete spec, or Clone App (paste a Google Play / App Store URL to reproduce an app, or "Make it better" to deep-dive + improve it + add AI). (Import Project lets you continue a project exported from another machine.)
 - **Website & Docs** — sidebar → generate a Next.js marketing website you can deploy to Vercel
 - **Push to GitHub** — Pipeline page → push the project source to a new GitHub repo
 

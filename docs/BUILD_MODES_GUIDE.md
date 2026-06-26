@@ -19,8 +19,7 @@ What do you have?
 ├── A vague idea (1 sentence) → AI Spec
 ├── A clear vision (3+ paragraphs) → Manual Entry
 ├── A complete spec as JSON → JSON Upload
-├── Screenshots of an app you want to clone → Clone App
-├── No idea — want Tateru to suggest one → Discover
+├── A Play / App Store URL (or screenshots) of an app to clone or improve → Clone App
 └── A .tateru-project archive from another machine → Import Project
 ```
 
@@ -28,9 +27,11 @@ If none of those fit, default to **AI Spec** — it's the most forgiving entry p
 
 ---
 
-## Mode 1 — Discover (AppScout)
+## Mode 1 — Discover (AppScout) — RETIRED (hidden from the menu)
 
-**Use when:** you don't have a specific app in mind. You want Tateru to find an opportunity for you in the Play Store data.
+> **As of 9.34.16.20, Discover's keyword market search is hidden.** Google rate-limits the unauthenticated Play Store search, so results became unreliable. Its genuinely useful half — the **deep-dive "make it better" analysis** (improve an existing app's features + optionally add AI) — lives on under **Clone App → "Make it better"** (Mode 5), now fed by a Play/App Store URL you paste instead of a flaky search. The sections below are kept for reference; the search code + `/scout` routes remain on disk (reversible).
+
+**(Historical) Use when:** you don't have a specific app in mind and want Tateru to find an opportunity for you in the Play Store data.
 
 ### How it works
 
@@ -352,22 +353,34 @@ JSON Upload mode is essentially the manual UI for the same `/api/build/projects`
 
 ## Mode 5 — Clone App
 
-**Use when:** you want to reverse-engineer an existing app from screenshots.
+**Use when:** you want to reproduce — or improve — an existing app. As of 9.34.16.20, Clone is **URL-driven** (paste a Google Play / App Store link) with two modes, and it absorbed the old Discover deep-dive engine.
 
-### How it works
+### Two modes
 
-1. You drop 1–8 PNG screenshots of an existing app
-2. **GPT-4o (vision)** reads them, identifies the app, infers features + screens + data flows
-3. Output: a Tateru-shaped JSON spec that opens in the New Project form for editing
+- **Clone as-is** — reproduce the app faithfully from its screenshots.
+- **Make it better** — deep-dive the app (its features + real user reviews), propose an **improved** version, with an option to **add AI** features. (This is the Discover deep-dive engine, now fed by a URL instead of a market search — see Mode 1.)
 
-### Field reference
+### How it works (Clone as-is)
 
-- **Choose images** button → file picker
-  - **OR** drag-and-drop area — drop PNGs anywhere on the page
-- **App name** (optional) — helps the analyzer if the screenshots don't clearly show the app's branding
-- **Description** (optional) — 1-line hint about what the app does (helps with ambiguous screens)
+1. Paste a **Google Play or App Store URL** (the store auto-detects from the link). Click **Fetch** — Tateru pulls the listing's screenshots into a shared pool.
+2. Optionally **drag-and-drop your own screenshots** into the same pool (mix store + your own, **8 max**). A listing with no public screenshots is a non-fatal note — just upload your own.
+3. Click **Analyze** — **GPT-4o (vision)** reads the pool, identifies the app, infers features + screens + data flows.
+4. Output: a Tateru-shaped JSON spec that opens in the New Project form, pre-filled, for editing → **Start Building**.
 
-After uploading 1–8 images, click **Analyze**.
+### How it works (Make it better)
+
+1. Paste a Play/App Store URL → **Deep dive & improve**.
+2. Tateru reads the app's features and mines its user reviews for complaints, then proposes an **improved** version (kept / improved / new features) with an optional **AI features** toggle. If the listing has few/no public reviews, the proposal is built from its description instead.
+3. You land in the **deep-dive editor** — review and tweak every proposed feature, toggle AI, then **Build My App**.
+
+### Field reference (Clone as-is)
+
+- **URL field** + **Fetch** — paste a Play/App Store link; Fetch pulls its screenshots into the pool.
+- **Google Play / App Store toggle** — auto-follows the pasted URL; overridable.
+- **Drop zone / thumbnail pool** — drag your own screenshots in; remove any (8 max, shared with fetched).
+- **App name** / **What is the app?** (optional) — hints for the analyzer; app name auto-fills from the listing.
+
+After the pool has at least one screenshot, click **Analyze**.
 
 ### What happens during analysis
 

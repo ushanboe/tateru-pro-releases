@@ -218,11 +218,11 @@ Six ways to start a NEW app project. Each opens the New Project page in a differ
 
 | Item | When to use |
 |---|---|
-| **Discover** | You want Tateru to scan the Play Store and suggest opportunity gaps. |
+| **Discover** | _(Hidden as of 9.34.16.20 — Google rate-limits the search. Its deep-dive "make it better" now lives under **Clone App**.)_ |
 | **AI Spec** | You have a fuzzy idea and want Tateru to ask clarifying questions. |
 | **Manual Entry** | You know exactly what you want — fill in a form. |
 | **JSON Upload** | You have a complete spec as JSON (power users / batch builds). |
-| **Clone App** | You have screenshots of an existing app — Tateru reverse-engineers a spec. |
+| **Clone App** | You have a **Play / App Store URL** (or screenshots) of an app — reproduce it (Clone as-is) or improve it + add AI (Make it better). |
 | **Import Project** | You have a `.tateru-project` archive from another machine. |
 
 ### App Polishers
@@ -350,9 +350,11 @@ That's **10 × 10 × 10** = 1,000 combinations. A **live preview** updates as yo
 
 The Look & Feel picker is the single place to choose your app's design — it replaces the old standalone "Themed Build" entry, the separate post-spec theme-picker step, and the external tateru-ux tool (all removed).
 
-### Discover (AppScout)
+### Discover (AppScout) — hidden as of 9.34.16.20
 
-**When to use:** you want Tateru to find an opportunity for you. You don't have a specific app in mind yet.
+> Discover's keyword market search is hidden — Google rate-limits the unauthenticated Play Store search, so results became unreliable. Its useful half — the **deep-dive "make it better" analysis** — now lives under **Clone App → "Make it better"**, fed by a URL you paste. The description below is kept for reference (the code + `/scout` routes remain on disk, reversible).
+
+**(Historical) When to use:** you want Tateru to find an opportunity for you. You don't have a specific app in mind yet.
 
 How it works:
 
@@ -450,11 +452,14 @@ Click **Validate & Create** — Tateru parses the JSON, checks the required fiel
 
 ### Clone App
 
-**When to use:** you want to reverse-engineer an existing app from screenshots.
+**When to use:** you want to reproduce — or improve — an existing app. As of 9.34.16.20 Clone is **URL-driven** with two modes (it also absorbed the Discover deep-dive). See **[BUILD_MODES_GUIDE — Mode 5](BUILD_MODES_GUIDE.md)** for the full walkthrough.
 
-How it works:
+- **Clone as-is** — paste a **Google Play / App Store URL** → **Fetch** pulls the listing's screenshots into a pool (add your own too, 8 max) → **Analyze** (GPT-4o vision) → spec → Start Building.
+- **Make it better** — paste a URL → **Deep dive & improve** → Tateru mines the app's features + user reviews → an improved version with an optional **Add AI** toggle → the deep-dive editor → Build My App.
 
-1. Click **Choose images** OR drag-and-drop 1–8 PNG screenshots of an app
+How it works (Clone as-is):
+
+1. Paste a Play/App Store URL and click **Fetch** (or drag-and-drop your own 1–8 PNG screenshots)
 2. Optional: app name + 1-line description (helps the analyzer)
 3. Click **Analyze**
 4. GPT-4o (vision) reads the screenshots and produces a Tateru-shaped spec — features, screens, data model, suggested tech stack
